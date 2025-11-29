@@ -1,0 +1,2177 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>হিসাব রাখা</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: #f5f7fa;
+    }
+
+    /* Navbar */
+    .navbar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: white;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      padding: 15px 20px;
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 10;
+    }
+
+    .menu-icon {
+      position: absolute;
+      left: 20px;
+      font-size: 24px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .navbar h1 {
+      font-size: 22px;
+      margin: 0;
+      font-weight: 700;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      position: fixed;
+      top: 65px;
+      left: -260px;
+      width: 230px;
+      height: 100%;
+      background: #9CC6ED;
+      transition: 0.3s;
+      padding-top: 20px;
+      z-index: 9;
+    }
+    
+    
+        .sidebar.open {
+      left: 0;
+    }
+
+    .sidebar a {
+      display: block;
+      padding: 15px 20px;
+      color: black;
+      text-decoration: none;
+      font-size: 16px;
+      transition: 0.2s;
+    }
+
+    .sidebar a:hover {
+      background: #87b8e0;
+    }
+
+    /* Main content */
+    .main-content {
+      margin-top: 90px;
+      padding: 20px;
+    }
+
+    /* Grid layout */
+    .cards-container {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+      padding: 20px;
+      text-align: center;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 10px rgba(0,0,0,0.12);
+    }
+
+    .card h3 {
+      margin: -8px;
+      font-size: 16px;
+      color: #ffff;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .card p {
+      margin-top: 18px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #ffff;
+    }
+
+@media (max-width: 768px) {
+  .cards-container {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .card {
+    min-height: 20px;
+    max-height: 80px;
+    padding: 8px 10px;
+  }
+
+  .card h3 {
+    font-size: 10px;
+  }
+
+  .card p {
+    font-size: 22px;
+  }
+}
+
+    .card1 { background: linear-gradient(135deg, #4CAF50, #81C784); color: white; }
+    .card2 { background: linear-gradient(135deg, #2196F3, #64B5F6); color: white; }
+    .card3 { background: linear-gradient(135deg, 
+      #F44336, #E57373); color: white; }
+    .card4 { background: linear-gradient(135deg, #9C27B0, #BA68C8); color: white; }
+    .card5 { background: linear-gradient(135deg, 
+      #FF9800, #FFB74D); color: white; }
+    .card6 { background: linear-gradient(135deg, #009688, #4DB6AC); color: white; }
+
+    .cash-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 10px;
+    }
+
+ 
+ .cash-buttons button {
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  color: white;
+  transition: 0.3s;
+}
+
+/* আলাদা আলাদা padding নিচের দুই ক্লাসে */
+.cash-in-btn {
+  background-color: #28a745;
+  padding: 10px 67px; /* ডানে-বামে বড় */
+}
+
+.cash-in-btn:hover {
+  background-color: #218838;
+}
+
+.cash-out-btn {
+  background-color: #dc3545;
+  padding: 10px 56px;
+}
+
+.cash-out-btn:hover {
+  background-color: #b02a37;
+}
+ 
+ 
+
+    /* ✅ ঠিক করা popup form */
+    .popup-form {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding-top: 0px;
+      z-index: 9999;
+    }
+
+    .form-content {
+      background: #fff;
+      padding: 25px 30px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      text-align: center;
+      animation: popupFade 0.3s ease;
+        
+    }
+
+    @keyframes popupFade {
+      from { transform: scale(0.9); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .form-content input,
+    .form-content select {
+      display: block;
+      width: 80%;
+      margin: 10px 0;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 15px;
+    }
+
+    .form-content button {
+      margin-top: 12px;
+      padding: 8px 20px;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      color: white;
+      background-color: #007bff;
+      transition: 0.3s;
+    }
+    
+    .form-content h1 {
+  margin-bottom: 15px;
+  font-size: 20px;
+    padding: 20px 25px;   /* উপরে-নিচে 20px, বামে-ডানে 25px */
+}
+.cashintext { color : green; }
+.cashouttext { color : red; }
+
+
+    .form-content button:hover {
+      background-color: #0056b3;
+}
+
+
+
+
+
+/* টাইপ সিলেক্ট করা */
+.row-line-type {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+  gap: 100px;
+}
+/* ছোট select */
+.account-type-a {
+  width: 200px!important;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+.account-type-b {
+width: 200px!important;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+
+.row-line-time{
+     display: flex;
+  align-items: center;
+  margin-top: 10px;
+}
+/* Date box */
+.date-box {
+  width: 200px!important;
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  margin-left: auto;
+  margin-right: -3px;
+  gap: 40px;
+}
+
+.date-box input {
+  display: none;
+}
+.date-box .icon {
+  width: 35px;
+  cursor: pointer;
+}
+
+/* Time Row */
+.time-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+}
+/* Time box */
+.time-box {
+  width: 200px;
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  gap: 70px;
+}
+
+.time-box input {
+  display: none;
+}
+
+.time-box .icon {
+  width: 28px;
+  cursor: pointer;
+}
+
+
+
+
+
+/* বাটন কনটেইনার */
+.button-row {
+    display: flex;
+    justify-content: space-between; /* Cancel বামে, Save ডানে */
+    width: 100%;
+    margin-top: 15px;
+}
+.cancel-btn {
+    background: #ff4d4d !important;
+    color: white;
+    padding: 12px 20px;
+    font-size: 15px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    width: 35%;
+    font-weight: bold;
+    box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+    margin-right: 60px;
+}
+.save-btn {
+    background: #007bff !important;
+    color: white;
+    padding: 12px 20px;
+    font-size: 15px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    width: 35%;
+    font-weight: bold;
+    box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+    
+}
+.cancel-btn:hover {
+    background: #e63939;
+}
+.save-btn:hover {
+    background: #0063cc;
+}   
+
+
+    /* ======================================================= */
+    /* === চূড়ান্ত ফিক্সড CSS (টেবিল হেডার + রো + স্ক্রল) === */
+    /* ======================================================= */
+
+.show-box {
+   padding: 0px;
+   height: auto;
+   width: 95%; 
+   max-width: 580px;
+   margin: 15px auto; 
+   border-radius: 10px;
+   background-color: #ffffff; 
+   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+   font-size: 18px;
+   font-weight: bold;
+   color: #00796b;
+   text-align: center;
+   
+   /* ✅ অনুভূমিক স্ক্রল এখানে হবে */
+   overflow-x: auto; 
+   overflow-y: visible;
+}
+   
+/* ================================
+   টেবিল ডানে স্ক্রল করার Wrapper
+================================ */
+.table-wrapper {
+    /* ✅ ফিক্স: টেবিলকে তার কন্টেন্টের মোট প্রস্থ নেওয়ার সুযোগ দিন */
+    display: block; 
+    border-collapse: collapse;
+    width: 100%; /* শুরুতেই 100% প্রস্থ নেবে */
+    border-radius: 8px;
+}
+
+/* ================================
+   Header + Body Row স্টাইল
+================================ */
+.transaction-table-header,
+#transactionBody {
+    display: table-row-group;
+    height: auto !importantn;
+    max-height: none;
+    overflow-y: visible;
+}
+
+/* ================================
+   Header Style
+================================ */
+.transaction-table-header {
+    background-color: #1a4e69; 
+    color: #fff;              
+    font-size: 14px;
+    font-weight: bold;
+    z-index: 9;
+    border-radius: 10px 10px 0 0;
+    /* ✅ বর্ডারটি রো-তে যাবে, এখানে দরকার নেই */
+}
+
+/* ================================
+   Header Cell এবং Body Cell স্টাইল
+================================ */
+.transaction-table-header div,
+.transaction-item div {
+    display: table-cell; /* ✅ Cell হিসাবে আচরণ করবে */
+    padding: 12px 10px;
+    white-space: nowrap;
+    vertical-align: middle;
+    height: 32px;
+}
+
+
+/* ================================
+   প্রতিটি Row (transaction-item)
+================================ */
+.transaction-item {
+    display: table-row; /* ✅ Row হিসাবে আচরণ করবে */
+    font-size: 14px;
+    color: #000;
+    border-bottom: 1px solid #ddd; /* ✅ ডোরা দাগের জন্য বর্ডার যোগ করা হলো */
+}
+
+/* কলামের প্রস্থ নির্ধারণ এবং নমনীয়তা (Cell-এ প্রস্থ সেট করা) */
+
+/* তারিখ এবং সময় (120px + 90px) */
+.transaction-item div:nth-child(1) { width: 120px; } 
+.transaction-item div:nth-child(2) { width: 90px; } 
+
+/* ক্যাটাগরি এবং লেনদেনকারী (150px + 150px) */
+.transaction-item div:nth-child(3) { width: 150px; } 
+.transaction-item div:nth-child(4) { width: 150px; } 
+
+/* বিবরণ কলাম (নমনীয়) */
+.transaction-item div:nth-child(5) { 
+    /* ✅ বিবরণ কলাম: নমনীয়ভাবে প্রসারিত হবে */
+    width: auto; 
+    min-width: 200px; /* সর্বনিম্ন প্রস্থ */
+} 
+
+/* পরিমাণ (120px) এবং Action (70px) */
+.transaction-item div:nth-child(6) { width: 120px; text-align: right; }
+.transaction-item div:nth-child(7) { width: 70px; }
+
+
+/* Header Cell এর প্রস্থ নিশ্চিত করা */
+.transaction-table-header div:nth-child(1) { width: 120px; }
+.transaction-table-header div:nth-child(2) { width: 90px; } 
+.transaction-table-header div:nth-child(3) { width: 150px; } 
+.transaction-table-header div:nth-child(4) { width: 150px; } 
+.transaction-table-header div:nth-child(5) { width: auto; min-width: 200px; }
+.transaction-table-header div:nth-child(6) { width: 120px; text-align: right; }
+.transaction-table-header div:nth-child(7) { width: 70px; }
+
+
+/* Amount color */
+.amount-in { color: green; }
+.amount-out { color: red; }
+
+/* Row hover */
+.transaction-item:hover {
+    background: #f8f8f8;
+}
+
+/* Action buttons */
+.action-buttons {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    justify-content: center;
+}
+
+.action-buttons button {
+    border: none;
+    padding: 5px 8px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.edit-btn { background: #007bff; color: #fff; }
+.delete-btn { background: #dc3545; color: #fff; }
+
+
+
+
+
+    /* Amount color */
+    .amount-in { color: green; }
+    .amount-out { color: red; }
+
+
+    /* Row hover */
+    .transaction-item:hover {
+        background: #f8f8f8;
+    }
+
+    /* Action buttons */
+    .action-buttons {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .action-buttons button {
+        border: none;
+        padding: 5px 8px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 12px;
+    }
+
+    .edit-btn { background: #007bff; color: #fff; }
+    .delete-btn { background: #dc3545; color: #fff; }
+
+
+
+/* ================================
+   ফিল্টার কন্ট্রোল স্টাইল
+================================ */
+.filter-controls {
+    text-align: left; /* বাম দিকে সরানোর জন্য */
+    padding: 10px 10px 0 10px;
+    width: 95%; 
+    max-width: 580px;
+    margin: 0 auto;
+    display: flex; /* কলাম সেটিংস এর পাশে রাখলে এটি লাগবে */
+    justify-content: space-between; /* যদি অন্য বাটন পাশে থাকে */
+    align-items: center;
+}
+
+#categoryFilter {
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    margin-right: 10px; /* কলাম সেটিংস বাটন থেকে দূরত্ব */
+    font-weight: 500;
+    color: #333;
+    min-width: 150px;
+}
+
+
+
+
+/* ================================
+   কলাম সেটিংস মেনু স্টাইল
+================================ */
+
+.row-line-show {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+  height: 70px;
+}
+
+.date-boxs {
+     height: 45px;
+     width: 110px!important;
+     background-color: #e9f542;
+     margin-left: 20px;
+     margin-right: 1px;
+     align-items: center;
+     border-radius: 4px;
+     align-items: center;
+     display: flex;
+     justify-content: center;
+}   
+
+/* ❌ বাটনটির স্টাইল */
+#clearDateBtn {
+    background: none;
+    border: 1px solid red;
+    color: red; 
+    border-radius: 4px;
+    font-size: 14px;
+    padding: 4px 8px;
+    cursor: pointer;
+    line-height: 1; 
+    margin: 0;
+    transition: background-color 0.2s;
+}
+#clearDateBtn:hover {
+    background-color: rgba(255, 0, 0, 0.1);
+}
+
+.cg-select {
+  background-color: #a5f57f;
+  margin-left: 25px;
+  border-radius: 4px;
+  font-size: 8px;
+  width: 50px!important;
+  height: 45px;
+  align-items: center;
+}
+
+.cash-select {
+  background-color: skyblue;
+  margin-left: 10px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 14px;
+  height: 45px;
+  width: 180px;
+  align-items: center;
+}
+
+.table-rejalt { 
+  background-color: #ccc297;
+  display: flex;
+  margin-left: 20px;
+  margin-right: 15px;
+  border-radius: 4px;
+  font-size: 14px;
+  height: 45px;
+  width: 200px;
+  align-items: center;
+  justify-content: center;
+}
+
+
+
+
+#toggleColumnsBtn {
+    height: 45px;
+    width: 80px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    margin-left: 20px;
+    margin-right: 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    
+    
+}
+
+.column-dropdown {
+    display: none; /* শুরুতে লুকানো থাকবে */
+    position: absolute;
+    top: 45px;
+    right: 10px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    border-radius: 6px;
+    padding: 10px;
+    z-index: 1000;
+    min-width: 150px;
+    text-align: left;
+}
+
+.column-dropdown label {
+    display: block;
+    font-size: 14px;
+    color: #333;
+    padding: 5px 0;
+    cursor: pointer;
+    font-weight: normal; /* টেবিল হেডারের Bold স্টাইল ওভাররাইড করতে */
+}
+
+.column-dropdown input[type="checkbox"] {
+    margin-right: 8px;
+}
+
+/* কলাম হাইড করার CSS */
+.hidden-col-1 div:nth-child(1),
+.hidden-col-2 div:nth-child(2),
+.hidden-col-3 div:nth-child(3),
+.hidden-col-4 div:nth-child(4),
+.hidden-col-5 div:nth-child(5),
+.hidden-col-6 div:nth-child(6),
+.hidden-col-7 div:nth-child(7) {
+    display: none !important;
+}
+
+
+
+
+
+/* ===================================================
+   ✅ পেজিনেশন এরিয়া (Wrapper for controls and page numbers)
+   =================================================== */
+
+.page-size-area {
+    /* দুটি চাইল্ড এলিমেন্টকে দুটি বিপরীত দিকে ঠেলে দেবে */
+    display: flex;
+    justify-content: space-between; 
+    
+    /* উল্লম্বভাবে কেন্দ্রে রাখতে */
+    align-items: center; 
+    
+    padding: 5px 15px;
+    border-top: 1px solid #ddd;
+    margin-top: 10px;
+    
+    /* কন্টেইনার যেন পুরো প্রস্থ ব্যবহার করে */
+    width: 100%; 
+    box-sizing: border-box;
+    max-width: 580px; /* আপনার কন্টেন্টের সাথে সামঞ্জস্য রেখে এই মান পরিবর্তন করুন */
+    margin: 0 auto; 
+}
+
+/* --------------------------------------------------- */
+
+/* ===================================================
+   ✅ পেজিনেশন বাটনগুলোর কন্টেইনার (.pagination-controls)
+   =================================================== */
+.pagination-controls {
+    text-align: left; /* বাম দিকে ফিক্স করা হলো */
+    padding: 0;
+    margin: 0; 
+    /* বাটনগুলিকে একসাথে রাখতে */
+    display: flex; 
+    gap: 3px;
+}
+
+/* পেজ লিঙ্কগুলির সাধারণ স্টাইল */
+.pagination-controls .page-link {
+    display: inline-block;
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    text-decoration: none;
+    color: #444;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+/* ✅ চূড়ান্ত ফিক্স: সক্রিয় (Active) পেজের জন্য হাইলাইট স্টাইল */
+/* JS এ ব্যবহৃত ক্লাস: '.active-page' */
+.pagination-controls .page-link.active-page {
+    /* !important ব্যবহার করা হয়েছে যাতে অন্য কোনো স্টাইল এটিকে ওভাররাইড না করে */
+    background-color: #007bff !important; /* উজ্জ্বল নীল ব্যাকগ্রাউন্ড */
+    color: white !important; /* লেখার রং সাদা */
+    border-color: #007bff !important;
+    font-weight: bold !important;
+    
+    /* হালকা বড় করতে */
+    transform: scale(1.05) !important; 
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2) !important;
+    cursor: default; /* অ্যাক্টিভ পেজে কার্সর ক্লিক-অযোগ্য দেখাবে */
+}
+
+/* অ্যাক্টিভ পেজে hover ও focus স্টাইল (হাইলাইট ধরে রাখার জন্য) */
+.pagination-controls .page-link.active-page:hover,
+.pagination-controls .page-link.active-page:focus {
+    background-color: #007bff !important;
+    color: white !important;
+}
+
+/* সাধারণ পেজ লিঙ্কে hover স্টাইল (অ্যাক্টিভ না হলে) */
+.pagination-controls .page-link:hover:not(.active-page) {
+    background-color: #e9ecef;
+}
+
+/* নিষ্ক্রিয় (disabled) নেভিগেশন বাটন (<<, >> যখন প্রথম বা শেষ পেজে থাকে) */
+.pagination-controls .page-link.disabled-nav {
+    color: #ccc !important; /* লেখা হালকা করে দিন */
+    background-color: #f7f7f7 !important; /* ব্যাকগ্রাউন্ড হালকা ধূসর */
+    border-color: #ddd !important;
+    cursor: default; /* কার্সরকে ক্লিক-অযোগ্য দেখান */
+    pointer-events: none; /* সম্পূর্ণরূপে ক্লিক বন্ধ করার জন্য */
+}
+
+/* এলিপসিস (...) স্টাইল */
+.ellipsis {
+    padding: 5px 4px;
+    color: #888;
+    font-size: 14px;
+}
+
+
+/* --------------------------------------------------- */
+
+/* ===================================================
+   ✅ লাইন সংখ্যা কন্ট্রোল (.page-size-control)
+   =================================================== */
+   
+.page-size-control {
+    font-size: 14px;
+    color: #444;
+    margin: 0; 
+}
+
+.page-size-control select {
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-left: 5px;
+    font-size: 14px;
+}
+
+
+
+
+
+
+
+
+    
+</style>
+
+</head>
+<body>
+
+  <div class="navbar">
+    <span class="menu-icon" onclick="toggleSidebar()">☰</span>
+    <h1>হিসাব রাখা</h1>
+  </div>
+
+  <div id="sidebar" class="sidebar">
+    <a href="index.html">🏠 ড্যাশবোর্ড</a>
+    <a href="Hisab.html">💰 হিসাব রাখা</a>
+    <a href="employee-list.html">🧑‍🤝‍🧑 Company People</a>
+    <a href="invoice.html">📑 বিল invoice</a>
+  </div>
+
+  <div class="main-content">
+    <div class="cards-container">
+      <div class="card card1"><p>৳ 0</p><h3>জমা আছে </h3></div>
+      <div class="card card2"><p>৳ 0</p><h3>আজকের জমা </h3></div>
+      <div class="card card3"><p>৳ 0</p><h3>আজকে খরচ</h3></div>
+      <div class="card card4"><p>৳ 0</p><h3>সর্বমোট জমা</h3></div>
+      <div class="card card5"><p>৳ 0</p><h3>King🏦Bank</h3></div>
+      <div class="card card6"><p>৳ 0</p><h3>মোট ঋণ</h3></div>
+    </div>
+  </div>
+
+  <div class="cash-buttons">
+    <button class="cash-in-btn" onclick="openForm('in')">💰 ক্যাশ ইন ➕</button>
+    <button class="cash-out-btn" onclick="openForm('out')">💸 ক্যাশ আউট ➖</button>
+</div>
+<div id="formContainer" class="popup-form" style="display:none;">
+
+    <div id="formIn" class="form-content" style="display:none;">
+    <h1 class="cashintext">ক্যাশ ইন</h1>
+    <div class="row-line-type">
+       <select class="account-type-b" id="incategory"required>
+  <option value="" disabled selected>Select</option>           <option>প্রজেক্ট 🔬</option>
+            <option>👜RRR Bazar</option>
+            <option>ঋন নেওয়া🩸</option>
+        </select>
+        
+       <select class="account-type-b" id="inperson"required>
+            <option>জমা💰করা</option>
+            <option>BANK🏦DP</option>
+        </select>        
+      </div>
+      
+        <div class="row-line-time">
+<div class="time-box">
+        <span id="showTimeIn">--:-- AM</span> 
+        <input type="time" id="timePickerIn"> 
+        <img src="time.png" class="icon" onclick="openTime('In')"> 
+</div>
+      <div class="date-box">
+    <span id="showDateIn">2025-11-14</span> 
+    <input type="date" id="datePickerIn" style="opacity:0; position:absolute; pointer-events:none;"> 
+    <img src="calendar.png" class="icon" onclick="openDate('In')"> 
+</div>
+</div>      
+      
+    <input type="number" id="inAmount" placeholder="পরিমাণ লিখুন">
+    <input type="text" id="inDescription" placeholder="বিবরণ দিন">
+
+    <div class="button-row">
+        <button class="cancel-btn" 
+          onclick="closeForm()">Cancel</button>
+        <button class="save-btn" onclick="saveIn()">Save</button>
+    </div>
+</div>
+
+<div id="formOut" class="form-content" style="display:none;">
+        <h1 class="cashouttext">ক্যাশ আউট</h1>
+      <div class="row-line-type">
+       <select class="account-type-a" id="outcategory"required>
+    <option value="" disabled selected>Select</option>
+            <option>বাজার🛍️সদাই</option>
+            <option>যাতায়াত🚕খরচ</option>
+            <option>নাস্তা🥪,লাঞ্চ,🍜</option>
+            <option>এক্সোসেরিজ🛒</option>
+            <option>সার্ভিস🔧কস্ট</option>
+            <option>ঋন দেওয়া♻️</option> 
+            <option>💵Salary💶</option>
+        </select>
+        
+<select class="account-type-b" id="outperson" required>
+    <option value="জমা টাকা💵">জমা টাকা💵</option>
+    <option value="ব্যাংক🔰চেক">ব্যাংক🔰চেক</option>
+    </select>
+   </div>
+   
+   <div id="salaryEmployeeSelectContainer" style="display:none;">
+    <select class="account-type-b" id="salaryEmployeeSelect" required>
+        <option value="" disabled selected>কার বেতন?</option>
+        </select>
+</div>
+
+   
+
+        <div class="row-line-time">
+<div class="time-box">
+        <span id="showTimeOut">--:-- AM</span> 
+        <input type="time" id="timePickerOut"> 
+        <img src="time.png" class="icon" onclick="openTime('Out')"> 
+</div>
+      <div class="date-box">
+    <span id="showDateOut">2025-11-14</span> 
+    <input type="date" id="datePickerOut" style="opacity:0; position:absolute; pointer-events:none;"> 
+    <img src="calendar.png" class="icon" onclick="openDate('Out')"> 
+</div>
+</div>
+
+        <input type="number" id="outAmount" placeholder="টাকার পরিমাণ লিখুন">
+        <input type="text" id="outDescription" placeholder="খরচের বিবরণ">
+       
+      </br>
+        <div class="button-row">
+          <button class="cancel-btn" 
+          onclick="closeForm()">Cancel</button>
+          <button class="save-btn" onclick="saveOut()">Save</button>
+        </div>
+    </div>
+
+</div>  
+
+<div class="Category-select">
+  
+</div>
+
+
+
+
+
+
+<div class="row-line-show">
+
+<div class="date-boxs">
+<div id="dateFilterWrapper" class="date-filter-group">
+    <button id="dateFilterBtn" class="filter-button" onclick="openDateRangeModal()">
+        📅  </button>
+    
+    <button id="clearDateBtn" onclick="clearDateRange()" style="display: none;">❌</button>
+</div>
+</div>
+
+
+<div id="dateRangeModal" class="popup-form" style="display:none;">
+    <div class="form-content" style="max-width: 350px;">
+        <h2 style="margin-top: 0;">তারিখ রেঞ্জ নির্বাচন করুন</h2>
+        
+        <label for="startDateFilter">শুরুর তারিখ:</label>
+        <input type="date" id="startDateFilter" style="margin-bottom: 15px;">
+
+        <label for="endDateFilter">শেষ তারিখ:</label>
+        <input type="date" id="endDateFilter">
+        
+        <div class="button-row" style="margin-top: 20px;">
+            <button class="cancel-btn" onclick="document.getElementById('dateRangeModal').style.display='none'">বাতিল</button>
+            <button class="save-btn" onclick="setDateRangeAndFilter()">প্রয়োগ করুন</button>
+        </div>
+    </div>
+</div>
+
+
+
+
+    <select class="cg-select" id="categoryFilter" onchange="filterByCategory()">
+        <option value="all">সব🌍</option>
+        <option value="IN_ONLY">💰 ক্যাশ ইন</option>
+        <option value="OUT_ONLY">💸 ক্যাশ আউট</option>
+        <option>বাজার🛍️সদাই</option>
+        <option>যাতায়াত🚕খর</option>
+        <option>নাস্তা🥪,লাঞ্চ,🍜</option>
+        <option>এক্সোসেরিজ🛒</option>
+        <option>সার্ভিস🔧কস্ট</option>
+        <option>ঋন নেওয়া🩸</option>
+        <option>ঋন দেওয়া♻️</option>
+        <option>💵Salary💶</option>
+        </select>
+
+
+
+
+  <div class="table-rejalt" >
+     ৳ = 0
+  </div>
+
+
+
+<div class="column-toggle-container">
+    <button id="toggleColumnsBtn">👁️⚙️</button>
+    
+    <div id="columnDropdown" class="column-dropdown">
+        <label><input type="checkbox" checked data-column="1"> তারিখ</label>
+        <label><input type="checkbox" checked data-column="2"> সময়</label>
+        <label><input type="checkbox" checked data-column="3"> ক্যাটাগরি</label>
+        <label><input type="checkbox" checked data-column="4"> লেনদেনকারী</label>
+        <label><input type="checkbox" checked data-column="5"> বিবরণ</label>
+        <label><input type="checkbox" checked data-column="6"> পরিমাণ</label>
+        <label><input type="checkbox" checked data-column="7"> Action</label>
+    </div>
+</div>
+</div>
+
+
+
+<div class="table-wrapper">
+    </div>
+
+<div class="show-box">
+    <div class="table-wrapper">
+        <div class="transaction-table-header">
+            <div class="th-date">তারিখ</div>
+            <div class="th-time">সময়</div>
+            <div class="th-category">ক্যাটাগরি</div>
+            <div class="th-person">লেনদেনকারী</div>
+            <div class="th-details">বিবরণ</div>
+            <div class="th-amount">পরিমাণ</div>
+            <div class="th-action">Action</div>
+        </div>
+        <div id="transactionBody"></div>
+    </div>
+</div>
+
+
+
+
+<div class="page-size-area">
+    
+    <div class="pagination-controls">
+        
+        <a href="#" class="page-link active">1</a> 
+        
+        <a href="#" class="page-link">2</a>
+        <a href="#" class="page-link">3</a>
+        <a href="#" class="page-link">4</a>
+        <a href="#" class="page-link">5</a>
+        <a href="#" class="page-link">>></a>
+        
+    </div>
+
+    <div class="page-size-control">
+        
+        <select id="rowsPerPageSelect" onchange="changeRowsPerPage(this.value)">
+            <option value="10" selected>10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+        </select>
+    </div>
+</div>
+
+
+
+<script>
+
+  // =======================================================
+  // === গ্লোবাল ডেটা তালিকা ও কনস্ট্যান্টস ===
+  // =======================================================
+
+  // আপনার HTML থেকে OUT ক্যাটাগরিগুলি ম্যানুয়ালি কপি করে নেওয়া হলো
+  const OUT_CATEGORIES = [
+      'বাজার🛍️সদাই', 'যাতায়াত🚕খরচ', 'নাস্তা🥪,লাঞ্চ,🍜', 
+      'এক্সোসেরিজ🛒', 'সার্ভিস🔧কস্ট', 'ঋন দেওয়া♻️', '💵Salary💶'
+  ];
+  const OUT_PERSONS = [
+      'জমা টাকা💵', 'ব্যাংক🔰চেক'
+  ];
+  
+  // আপনার HTML থেকে IN ক্যাটাগরিগুলি ম্যানুয়ালি কপি করে নেওয়া হলো
+  const IN_CATEGORIES_HTML = ['প্রজেক্ট 🔬', '👜RRR Bazar', 'ঋন নেওয়া🩸']; 
+  const IN_PERSONS_HTML = ['জমা💰করা', 'BANK🏦DP']; 
+
+  const kingBankCategory = 'BANK🏦DP'; // ব্যাংক ডিপোজিটের জন্য এটি প্রয়োজন 
+  // গ্লোবাল কনস্ট্যান্ট
+  const cashOutPerson = 'জমা টাকা💵'; 
+  const bankOutPerson = 'ব্যাংক🔰চেক';
+  const loanTakenCategory = 'ঋন নেওয়া🩸';
+  const loanGivenCategory = 'ঋন দেওয়া♻️';
+
+
+// Hishab.html ফাইলের <script> ট্যাগের ভেতরে এটি পরিবর্তন করুন:
+
+function loadEmployeesFromDatabase() {
+    // 💡 আপনার employee-list.html এ সেভ করা 'employees' local storage key থেকে ডেটা টানা হচ্ছে
+    const employeesJson = localStorage.getItem('employees');
+    
+    // JSON স্ট্রিং থেকে JavaScript অ্যারেতে রূপান্তর করা
+    const allEmployees = employeesJson ? JSON.parse(employeesJson) : [];
+    
+    // শুধুমাত্র প্রয়োজনীয় ফিল্ড (id, name, salary) সহ একটি অ্যারে ফেরত দেওয়া হচ্ছে
+    return allEmployees.map(emp => ({
+        id: emp.id,
+        name: emp.name,
+        // নিশ্চিত করা হচ্ছে যে salary একটি সংখ্যা হিসেবে যাচ্ছে
+        salary: parseFloat(emp.salary) || 0 
+    }));
+}
+// এর পর যে ফাংশনটি ড্রপডাউন তৈরি করে (যেমন: populateSalaryEmployeeSelect()),
+// সেটি এই ফাংশন থেকে পাওয়া তালিকা ব্যবহার করবে।
+
+
+  // =======================================================
+  // === গ্লোবাল ভেরিয়েবলস, ডেটা লোডিং ও পেজিনেশন সেটিংস ===
+  // =======================================================
+
+  let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+  const today = new Date().toISOString().substring(0, 10);
+  
+  let rowsPerPage = 10; 
+  let currentPage = 1;
+  
+  // এডিট মোড চেক করা
+  let isEditingIndex = null; 
+  
+  // ডেট ফিল্টার স্টোর করার জন্য গ্লোবাল ভ্যারিয়েবল (যদিও getFilteredTransactions সরাসরি dataset ব্যবহার করে)
+  // এটি রাখা হলো যদি ভবিষ্যতে অন্য কোনো ফাংশন ব্যবহার করে
+  let startDate = null; 
+  let endDate = null; 
+
+  // =======================================================
+  // === সাইডবার, ফর্ম ওপেন/ক্লোজ এবং টাইম/ডেট ফাংশন ===
+  // =======================================================
+
+  function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    sidebar.classList.toggle('open');
+  }
+
+  document.querySelectorAll('.sidebar a').forEach(link => {
+    link.addEventListener('click', () => {
+      document.getElementById('sidebar').classList.remove('open');
+    });
+  });
+
+  
+  function openForm(type) {
+      const formContainer = document.getElementById("formContainer");
+      if (!formContainer) {
+          console.error("HTML Error: formContainer ID not found.");
+          return;
+      }
+      formContainer.style.display = "flex";
+      
+      const TypeCapital = type === 'in' ? 'In' : 'Out';
+
+      if (type === "in") {
+          document.getElementById("formIn").style.display = "block";
+          document.getElementById("formOut").style.display = "none";
+      } else {
+          document.getElementById("formIn").style.display = "none";
+          document.getElementById("formOut").style.display = "block";
+      }
+      
+      // নতুন এন্ট্রি হলে রিসেট নিশ্চিত করা
+      if (isEditingIndex === null) {
+          document.getElementById('inAmount').value = ''; 
+          document.getElementById('inDescription').value = ''; 
+          document.getElementById('outAmount').value = ''; 
+          document.getElementById('outDescription').value = ''; 
+          
+          const inSaveBtn = document.getElementById('inSaveBtn');
+          if (inSaveBtn) inSaveBtn.innerText = 'Save';
+          const outSaveBtn = document.getElementById('outSaveBtn');
+          if (outSaveBtn) outSaveBtn.innerText = 'Save';
+          
+          setAutoTime(TypeCapital);
+
+          // ডিফল্ট সিলেক্ট সেট করা 
+          const inCategorySelect = document.getElementById('incategory');
+          if (inCategorySelect) { inCategorySelect.selectedIndex = inCategorySelect.options.length > 1 ? 1 : 0; }
+          const inPersonSelect = document.getElementById('inperson');
+          if (inPersonSelect) { inPersonSelect.value = 'জমা💰করা'; }
+          
+          const outCategorySelect = document.getElementById('outcategory');
+          if (outCategorySelect) { outCategorySelect.selectedIndex = outCategorySelect.options.length > 1 ? 1 : 0; }
+          const outPersonSelect = document.getElementById('outperson');
+          if (outPersonSelect) { outPersonSelect.value = cashOutPerson; } 
+          
+          // স্যালারি ড্রপডাউন লুকানো
+          if (type === 'out') toggleSalaryEmployeeSelect();
+      }
+  }
+
+  
+  
+
+  function closeForm() {
+      document.getElementById("formContainer").style.display = "none";
+      document.getElementById("formIn").style.display = "none";
+      document.getElementById("formOut").style.display = "none";
+      
+      // এডিট মোড রিসেট করা
+      isEditingIndex = null;
+      
+      const inSaveBtn = document.getElementById('inSaveBtn');
+      if (inSaveBtn) inSaveBtn.innerText = 'Save';
+      const outSaveBtn = document.getElementById('outSaveBtn');
+      if (outSaveBtn) outSaveBtn.innerText = 'Save';
+      
+      // স্যালারি ড্রপডাউন লুকিয়ে রাখা
+      const employeeSelectContainer = document.getElementById('salaryEmployeeSelectContainer');
+      if (employeeSelectContainer) employeeSelectContainer.style.display = 'none';
+      
+      // HTML ভিত্তিক রিসেট 
+      const inCategorySelect = document.getElementById('incategory');
+      if (inCategorySelect) { inCategorySelect.selectedIndex = inCategorySelect.options.length > 1 ? 1 : 0; }
+      const inPersonSelect = document.getElementById('inperson');
+      if (inPersonSelect) { inPersonSelect.selectedIndex = inPersonSelect.options.length > 1 ? 1 : 0; }
+      const outCategorySelect = document.getElementById('outcategory');
+      if (outCategorySelect) { outCategorySelect.selectedIndex = outCategorySelect.options.length > 1 ? 1 : 0; }
+      const outPersonSelect = document.getElementById('outperson');
+      if (outPersonSelect) { outPersonSelect.value = cashOutPerson; } 
+  }  
+  
+
+  function setAutoTime(type) {
+      const now = new Date();
+      let hour = now.getHours();
+      let minute = now.getMinutes();
+      const today = now.toISOString().substring(0, 10);
+
+      minute = minute < 10 ? "0" + minute : minute;
+      let ampm = hour >= 12 ? "PM" : "AM";
+      let showHour = hour % 12 || 12;
+
+      document.getElementById(`showTime${type}`).innerText = `${showHour}:${minute} ${ampm}`;
+      document.getElementById(`showDate${type}`).innerText = today;
+
+      document.getElementById(`timePicker${type}`).value = 
+          now.toISOString().substring(11, 16);
+      document.getElementById(`datePicker${type}`).value = today;
+  }
+  function openTime(type) {
+      const timeInput = document.getElementById(`timePicker${type}`);
+      if (timeInput && timeInput.showPicker) timeInput.showPicker();
+      else if (timeInput) timeInput.click();
+  }
+  function openDate(type) {
+      const dateInput = document.getElementById(`datePicker${type}`);
+      if (dateInput && dateInput.showPicker) dateInput.showPicker();          
+      else if (dateInput) dateInput.click();          
+  }
+
+  // টাইম/ডেট ইনপুট পরিবর্তনের জন্য ইভেন্ট লিসেনার
+  const timePickerIn = document.getElementById("timePickerIn");
+  if(timePickerIn) timePickerIn.addEventListener("change", function () {
+      let [hour, minute] = this.value.split(":");
+      hour = parseInt(hour);
+      let ampm = hour >= 12 ? "PM" : "AM";
+      let showHour = hour % 12 || 12;
+      document.getElementById("showTimeIn").innerText = `${showHour}:${minute} ${ampm}`;
+  });
+  
+  const timePickerOut = document.getElementById("timePickerOut");
+  if(timePickerOut) timePickerOut.addEventListener("change", function () {
+      let [hour, minute] = this.value.split(":");
+      hour = parseInt(hour);
+      let ampm = hour >= 12 ? "PM" : "AM";
+      let showHour = hour % 12 || 12;
+      document.getElementById("showTimeOut").innerText = `${showHour}:${minute} ${ampm}`;
+  });
+
+  const datePickerIn = document.getElementById("datePickerIn");
+  if(datePickerIn) datePickerIn.addEventListener("change", function () {
+      document.getElementById("showDateIn").innerText = this.value;
+  });
+  
+  const datePickerOut = document.getElementById("datePickerOut");
+  if(datePickerOut) datePickerOut.addEventListener("change", function () {
+      document.getElementById("showDateOut").innerText = this.value;
+  });
+
+
+  // =======================================================
+  // === ব্যালেন্স ও কার্ড আপডেট ফাংশন ===
+  // =======================================================
+function calculateAndDisplayBalance() {
+    let totalOut = 0;   
+    let totalInToday = 0;
+    let totalOutToday = 0;
+    let totalInCash = 0;  
+    let totalKingBank = 0;  
+    let totalLoan = 0;
+    
+    // ক্যাটাগরি কনস্ট্যান্ট
+    const loanTakenCategory = 'ঋন নেওয়া🩸';
+    const loanGivenCategory = 'ঋন দেওয়া♻️';
+
+    transactions.forEach(t => {
+        // ১. ক্যাশ ইন (In)
+        if (t.type === 'in') {
+            if (t.person === kingBankCategory) { 
+                totalKingBank += t.amount; 
+            } else {
+                totalInCash += t.amount;   
+            }
+        } 
+        
+        // ২. ক্যাশ আউট (Out)
+        else if (t.type === 'out') {
+            totalOut += t.amount;
+            
+           if (t.person === bankOutPerson) {
+                totalKingBank -= t.amount; 
+            }
+        }   
+        
+        // ৩. ঋণ (Loan) গণনা
+        if (t.type === 'in' && t.category === loanTakenCategory) {
+            totalLoan += t.amount;  
+        }
+        if (t.type === 'out' && t.category === loanGivenCategory) {
+            totalLoan -= t.amount; 
+        }
+
+        // ৪. আজকের জমা/খরচ গণনা
+        if (t.date === today) {
+            if (t.type === 'in' && t.person !== kingBankCategory) { 
+                totalInToday += t.amount;
+            } 
+            else if (t.type === 'out') {
+                totalOutToday += t.amount;
+            }
+        }
+    });
+    
+    // হাতে থাকা নেট ব্যালেন্স গণনা
+    let totalCashOutFromCash = transactions
+        .filter(t => t.type === 'out' && t.person === cashOutPerson)
+        .reduce((sum, t) => sum + t.amount, 0);
+
+    let netBalance = totalInCash - totalCashOutFromCash; 
+    const totalDeposit = totalInCash + totalKingBank; 
+
+    // কার্ডগুলি আপডেট করা
+    const card1 = document.querySelector('.card1 p');
+    if(card1) card1.innerText = `৳ ${netBalance.toFixed(0)}`;     
+    const card2 = document.querySelector('.card2 p');
+    if(card2) card2.innerText = `৳ ${totalInToday.toFixed(0)}`;   
+    const card3 = document.querySelector('.card3 p');
+    if(card3) card3.innerText = `৳ ${totalOutToday.toFixed(0)}`;  
+    const card4 = document.querySelector('.card4 p');
+    if(card4) card4.innerText = `৳ ${totalDeposit.toFixed(0)}`;   
+    const card5 = document.querySelector('.card5 p');
+    if(card5) card5.innerText = `৳ ${totalKingBank.toFixed(0)}`;  
+    const card6 = document.querySelector('.card6 p');
+    if(card6) card6.innerText = `৳ ${totalLoan.toFixed(0)}`;      
+}
+
+
+  // =======================================================
+  // === স্যালারি ড্রপডাউন লজিক (নতুন) ===
+  // =======================================================
+
+function populateSalaryEmployeeSelect() {
+    const select = document.getElementById('salaryEmployeeSelect');
+    if (!select) return;
+
+    // পুরানো অপশন মুছে ফেলা
+    select.innerHTML = '<option value="" disabled selected>কার বেতন?</option>';
+
+    // নতুন অপশন যোগ করা
+    EMPLOYEES_LIST.forEach(employee => {
+        const option = document.createElement('option');
+        // value হিসেবে Employee ID ব্যবহার করা হয়েছে
+        option.value = employee.id; 
+        // টাকা সংখ্যায় কমা যোগ করা হয়েছে
+        option.textContent = `${employee.name} (৳${employee.salary.toLocaleString('bn-BD')})`; 
+        select.appendChild(option);
+    });
+}
+
+function toggleSalaryEmployeeSelect() {
+    const outCategorySelect = document.getElementById('outcategory');
+    const employeeSelectContainer = document.getElementById('salaryEmployeeSelectContainer');
+    const employeeSelect = document.getElementById('salaryEmployeeSelect');
+    
+    if (!employeeSelectContainer || !employeeSelect) return;
+
+    if (outCategorySelect.value === '💵Salary💶') {
+        employeeSelectContainer.style.display = 'block';
+        // HTML5-এর 'required' এট্রিবিউট সেট করা
+        employeeSelect.setAttribute('required', 'required'); 
+    } else {
+        employeeSelectContainer.style.display = 'none';
+        employeeSelect.removeAttribute('required');
+    }
+}
+
+  // =======================================================
+  // === ট্রানজেকশন ফিল্টারিং, সর্টিং, সেভ, এডিট, ডিলিট ফাংশন ===
+  // =======================================================
+  
+// একটি ট্রানজেকশনের তারিখ এবং সময়কে একটি তুলনীয় টাইমস্ট্যাম্পে রূপান্তর করে
+function getTransactionSortKey(t) {
+    if (!t.date || !t.time) {
+        // যদি তারিখ বা সময় না থাকে, তবে সংরক্ষণের সময়টি ব্যবহার করা হবে
+        return t.timestamp || 0; 
+    }
+
+    let time24hr;
+    let [timeStr, ampm] = t.time.split(' '); 
+    
+    // AM/PM থেকে 24-ঘন্টা ফরম্যাটে রূপান্তর
+    if (ampm) { 
+        let [hour, minute] = timeStr.split(':');
+        hour = parseInt(hour);
+        minute = parseInt(minute);
+        if (ampm === 'PM' && hour !== 12) hour += 12;
+        if (ampm === 'AM' && hour === 12) hour = 0; // মধ্যরাত 12 AM
+        
+        time24hr = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+    } else {
+        // যদি সময়টি AM/PM ছাড়া থাকে (সুরক্ষার জন্য)
+        time24hr = t.time.substring(0, 5);
+    }
+
+    // একটি সম্পূর্ণ ডেট-টাইম স্ট্রিং তৈরি করা: YYYY-MM-DDTTHH:MM:SS
+    const dateTimeStr = `${t.date}T${time24hr}:00`;
+    
+    // স্ট্রিং থেকে টাইমস্ট্যাম্প তৈরি করা
+    const timestamp = new Date(dateTimeStr).getTime();
+    
+    // যদি রূপান্তর ব্যর্থ হয়, তবে সংরক্ষণের সময়টি ফিরিয়ে দেওয়া হবে
+    return isNaN(timestamp) ? t.timestamp || 0 : timestamp;
+}
+
+function getFilteredTransactions() {
+    // ১. ফিল্টার ভ্যালু নেওয়া
+    const selectedCategory = document.getElementById('categoryFilter') ? document.getElementById('categoryFilter').value : 'all';
+    
+    // ২. ডেট ফিল্টার ভ্যালু নেওয়া (dateFilterBtn dataset থেকে)
+    const dateFilterBtn = document.getElementById('dateFilterBtn');
+    const startDateVal = dateFilterBtn ? dateFilterBtn.dataset.startDate || '' : '';
+    const endDateVal = dateFilterBtn ? dateFilterBtn.dataset.endDate || '' : '';
+    
+    const startDate = startDateVal ? new Date(startDateVal + 'T00:00:00').getTime() : 0;
+    const endDate = endDateVal ? new Date(endDateVal + 'T23:59:59').getTime() : Infinity;
+
+    let allTransactions = [...transactions];
+    
+    // ৩. ফিল্টারিং লজিক
+    let filteredTransactions = allTransactions.filter(t => {
+        let categoryMatch = false; 
+        
+        // **টাইপ ফিল্টারিং এবং ক্যাটাগরি লজিক:**
+        if (selectedCategory === 'IN_ONLY') {
+            categoryMatch = t.type === 'in'; 
+        } else if (selectedCategory === 'OUT_ONLY') {
+            categoryMatch = t.type === 'out'; 
+        } else if (selectedCategory === 'all') {
+            categoryMatch = true; 
+        } else {
+            categoryMatch = t.category === selectedCategory;
+        }
+
+        // ডেট ফিল্টারিং লজিক
+        const transactionDate = t.date ? new Date(t.date + 'T00:00:00').getTime() : 0;
+        const dateMatch = transactionDate >= startDate && transactionDate <= endDate;
+
+        return categoryMatch && dateMatch; 
+    });
+
+    // ৪. সর্টিং লজিক: তারিখ এবং সময়ের ভিত্তিতে নতুন ট্রানজেকশন উপরে দেখানোর জন্য
+    filteredTransactions.sort((a, b) => {
+        const timestampA = getTransactionSortKey(a);
+        const timestampB = getTransactionSortKey(b);
+        
+        // তারিখ/সময়ের ভিত্তিতে সর্ট (নতুন (বেশি) টাইমস্ট্যাম্প আগে)
+        if (timestampB !== timestampA) {
+            return timestampB - timestampA;
+        }
+        
+        // যদি তারিখ/সময় একই হয়, তবে যে ট্রানজেকশনটি পরে তৈরি হয়েছে (b.timestamp) সেটি আগে দেখাবে (সেকেন্ডারি সর্ট)
+        return b.timestamp - a.timestamp; 
+    });
+    
+    return filteredTransactions;
+}
+   
+function applyFilters() {
+    currentPage = 1; 
+    displayTransactions(); 
+    setupPagination();
+    updateResultAmount(); 
+}
+
+
+function updateResultAmount() {
+    const filtered = getFilteredTransactions();
+    let totalAmount = 0;
+    
+    const selectedCategory = document.getElementById('categoryFilter') ? document.getElementById('categoryFilter').value : 'all';
+    
+    filtered.forEach(t => {
+        totalAmount += t.amount;
+    });
+
+    const resultDiv = document.querySelector('.table-rejalt');
+    
+    if (resultDiv) {
+        if (selectedCategory === 'all') {
+            const netBalanceText = document.querySelector('.card1 p') ? document.querySelector('.card1 p').innerText.replace('৳ ', '') : '0';
+            const netBalance = parseFloat(netBalanceText) || 0;
+            resultDiv.innerText = `৳ ${netBalance.toFixed(0)}`;
+        } 
+        else {
+            resultDiv.innerText = `৳ ${totalAmount.toFixed(0)}`;
+        }
+    }
+}
+
+
+  function saveTransaction(type) {
+    const isEditing = isEditingIndex !== null;
+    
+    const amountInput = document.getElementById(`${type === 'in' ? 'inAmount' : 'outAmount'}`);
+    const descriptionInput = document.getElementById(`${type === 'in' ? 'inDescription' : 'outDescription'}`);
+    const categoryInput = document.getElementById(`${type === 'in' ? 'incategory' : 'outcategory'}`); 
+    const personInput = document.getElementById(`${type === 'in' ? 'inperson' : 'outperson'}`);     
+    const selectedTime = document.getElementById(`showTime${type === 'in' ? 'In' : 'Out'}`).innerText; 
+    const selectedDate = document.getElementById(`showDate${type === 'in' ? 'In' : 'Out'}`).innerText; 
+    const amount = parseFloat(amountInput.value);
+    
+    let categoryValue = categoryInput ? categoryInput.value : (type === 'in' ? 'অজানা আয়' : 'অজানা খরচ');
+    let personValue = personInput ? personInput.value : 'নগদ';
+    let descriptionValue = descriptionInput.value || (type === 'in' ? 'জমা' : 'খরচ');
+
+    if (isNaN(amount) || amount <= 0) {
+      alert("সঠিক পরিমাণ লিখুন।");
+      return;
+    }
+    
+    // স্যালারি লজিক যোগ করা
+    if (type === 'out' && categoryValue === '💵Salary💶') {
+        const salaryEmployeeSelect = document.getElementById('salaryEmployeeSelect');
+        if (salaryEmployeeSelect && salaryEmployeeSelect.value) {
+            const selectedEmployeeOption = salaryEmployeeSelect.options[salaryEmployeeSelect.selectedIndex].textContent;
+            // Employee Name ও Salary Description-এ যুক্ত করা 
+            descriptionValue = `বেতন: ${selectedEmployeeOption} - ${descriptionValue}`; 
+        } else {
+             alert("বেতন দেওয়ার জন্য কর্মচারীকে নির্বাচন করুন।");
+             return;
+        }
+    }
+
+
+    const newTransaction = {
+        type: type,
+        amount: amount,
+        description: descriptionValue,
+        time: selectedTime, 
+        category: categoryValue, 
+        person: personValue, 
+        date: selectedDate, 
+        timestamp: isEditing ? transactions[isEditingIndex].timestamp : new Date().getTime()
+    };
+    
+    if (isEditing) {
+        transactions[isEditingIndex] = newTransaction;
+    } else {
+        transactions.push(newTransaction);
+    }
+    
+    localStorage.setItem('transactions', JSON.stringify(transactions));
+
+    calculateAndDisplayBalance();
+    displayTransactions();
+    setupPagination();
+    closeForm();
+  }
+  
+  function saveIn() {
+    saveTransaction('in');
+  }
+  function saveOut() {
+    saveTransaction('out');
+  }
+
+
+  function editTransaction(index) {
+    const t = transactions[index];
+    if (!t) { console.error("Invalid transaction index:", index); return; }
+    isEditingIndex = index; 
+    
+    const type = t.type;
+    document.getElementById("formContainer").style.display = "flex";
+    
+    const TypeCapital = type === 'in' ? 'In' : 'Out';
+    if (type === "in") {
+        document.getElementById("formIn").style.display = "block";
+        document.getElementById("formOut").style.display = "none";
+    } else {
+        document.getElementById("formIn").style.display = "none";
+        document.getElementById("formOut").style.display = "block";
+    }
+    
+    document.getElementById(`${type}Amount`).value = t.amount;
+    document.getElementById(`${type}Description`).value = t.description;
+    
+    const categorySelect = document.getElementById(`${type}category`);
+    if (categorySelect) {
+        categorySelect.value = t.category;
+        // Edit করার সময় Salary সিলেক্ট থাকলে ড্রপডাউন দেখাবে 
+        if (type === 'out' && t.category === '💵Salary💶') {
+            const employeeSelectContainer = document.getElementById('salaryEmployeeSelectContainer');
+            if (employeeSelectContainer) employeeSelectContainer.style.display = 'block';
+        }
+    }
+    
+    const personSelect = document.getElementById(`${type}person`);
+    if (personSelect) personSelect.value = t.person;
+    
+    let time24hr;
+    let [timeStr, ampm] = t.time.split(' '); 
+    
+    if (ampm) { 
+        let [hour, minute] = timeStr.split(':');
+        hour = parseInt(hour);
+        if (ampm === 'PM' && hour !== 12) hour += 12;
+        if (ampm === 'AM' && hour === 12) hour = 0;
+        time24hr = `${String(hour).padStart(2, '0')}:${minute}`;
+    } else {
+        time24hr = t.time.substring(0, 5);
+    }
+    
+    const timePicker = document.getElementById(`timePicker${TypeCapital}`);
+    if (timePicker) timePicker.value = time24hr;
+    const showTime = document.getElementById(`showTime${TypeCapital}`);
+    if (showTime) showTime.innerText = t.time;
+    
+    const datePicker = document.getElementById(`datePicker${TypeCapital}`);
+    if (datePicker) datePicker.value = t.date;
+    const showDate = document.getElementById(`showDate${TypeCapital}`);
+    if (showDate) showDate.innerText = t.date;
+    
+    const saveBtn = document.getElementById(`${t.type}SaveBtn`);
+    if (saveBtn) saveBtn.innerText = 'Update';
+  }
+
+
+  function deleteTransaction(index) {
+    if (!confirm("আপনি কি নিশ্চিত যে আপনি এই লেনদেনটি মুছে ফেলতে চান?")) { return; }
+    transactions.splice(index, 1); 
+    localStorage.setItem('transactions', JSON.stringify(transactions));
+    
+    const totalTransactionsAfterDelete = getFilteredTransactions().length;
+    currentPage = Math.min(currentPage, Math.max(1, Math.ceil(totalTransactionsAfterDelete / rowsPerPage)));
+
+    calculateAndDisplayBalance();
+    displayTransactions(); 
+    setupPagination(); 
+    updateResultAmount();
+}
+
+
+  // =======================================================
+  // === ট্রানজেকশন তালিকা UI-তে দেখানোর ফাংশন ===
+  // =======================================================
+  function displayTransactions() {
+    const tableBody = document.getElementById('transactionBody');
+    const paginationControls = document.querySelector('.pagination-controls'); 
+    let listHTML = ``;
+    
+    const filteredTransactions = getFilteredTransactions();
+    const totalTransactions = filteredTransactions.length;
+    
+    const start = (currentPage - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+    const paginatedItems = filteredTransactions.slice(start, end);
+
+    if (paginatedItems.length === 0 && totalTransactions > 0) {
+        currentPage = Math.max(1, Math.ceil(totalTransactions / rowsPerPage));
+        displayTransactions(); 
+        return;
+    }
+    
+    if (totalTransactions === 0) {
+        listHTML = `<p style="text-align: center; color: #888; padding: 20px;">কোনো লেনদেন পাওয়া যায়নি।</p>`;
+        tableBody.innerHTML = listHTML;
+        if(paginationControls) paginationControls.innerHTML = '';
+        return; 
+    }
+
+    paginatedItems.forEach((t) => {
+        const amountClass = t.type === 'in' ? 'amount-in' : 'amount-out';
+        const sign = t.type === 'in' ? '+' : '-';
+   
+        let customStyle = '';
+        if (t.type === 'in' && t.category === loanTakenCategory) {
+            customStyle = 'style="color: #5d30d9;"'; // ঋন নেওয়া
+        }
+        if (t.type === 'out' && t.category === loanGivenCategory) {
+            customStyle = 'style="color: #dd3be3;"'; // ঋন দেওয়া
+        }
+       else if (t.type === 'in' && t.person === kingBankCategory) { 
+             customStyle = 'style="color: #007bff; font-weight: bold;"'; // ব্যাংক ডিপোজিট
+        }
+        
+        const originalIndex = transactions.findIndex(tx => tx.timestamp === t.timestamp && tx.amount === t.amount);
+
+        listHTML += `
+            <div class="transaction-item">
+                <div>${t.date || 'তারিখ নেই'}</div>
+                <div>${t.time || '--:--'}</div> 
+                <div>${t.category || 'not select'}</div> 
+                <div>${t.person || 'not select'}</div> 
+                <div>${t.description}</div> 
+                <div class="${amountClass}"${customStyle}>
+                    ${sign} ৳ ${t.amount.toFixed(0)}
+                </div>
+                <div class="action-buttons">
+                    <button onclick="editTransaction(${originalIndex})" class="edit-btn">Edit</button>
+                    <button onclick="deleteTransaction(${originalIndex})" class="delete-btn">Delete</button>
+                </div> 
+            </div>
+        `;
+    });
+
+    tableBody.innerHTML = listHTML;
+    
+    if(paginationControls) {
+        setupPagination(); 
+    }
+  }
+
+
+  // =======================================================
+  // === পেজিনেশন ফাংশন (FINAL FIXED FOR 10+ PAGES) ===
+  // =======================================================
+  function setupPagination() {
+      const filteredTransactions = getFilteredTransactions(); // assumes this function exists and works
+      const totalPages = Math.ceil(filteredTransactions.length / rowsPerPage); // assumes rowsPerPage exists
+      const paginationContainer = document.querySelector('.pagination-controls');
+      
+      if (!paginationContainer) return; 
+
+      paginationContainer.innerHTML = ''; 
+
+      if (totalPages === 0) return; 
+
+      const maxPagesToShow = 5; 
+      let startPage, endPage;
+
+      // রেঞ্জ ক্যালকুলেশন
+      if (totalPages <= maxPagesToShow) {
+          startPage = 1;
+          endPage = totalPages;
+      } else {
+          const middle = Math.ceil(maxPagesToShow / 2);
+          
+          if (currentPage <= middle) {
+              startPage = 1;
+              endPage = maxPagesToShow;
+          } else if (currentPage + middle > totalPages) {
+              startPage = totalPages - maxPagesToShow + 1;
+              endPage = totalPages;
+          } else {
+              startPage = currentPage - middle + 1;
+              endPage = currentPage + middle - 1;
+          }
+      }
+
+      // 1. '<<' বাটন
+      const prevButton = createPaginationButton('<<', currentPage - 1);
+      if (currentPage === 1) {
+          prevButton.classList.add('disabled-nav'); 
+      }
+      paginationContainer.appendChild(prevButton);
+
+      // 2. Page 1 (সর্বদা দৃশ্যমান)
+      const pageOneButton = createPaginationButton(1, 1);
+      if (currentPage === 1) pageOneButton.classList.add('active-page');
+      paginationContainer.appendChild(pageOneButton);
+
+      // 3. প্রথম ellipsis (...)
+      if (startPage > 2) {
+          paginationContainer.appendChild(createEllipsis());
+      }
+
+      // 4. পেজ নম্বর বাটন (লুপ)
+      // Loop শুরু হবে 2 থেকে
+      let loopStart = Math.max(2, startPage);
+      let loopEnd = endPage;
+      
+      // ✅ FIX 1: লুপের রেঞ্জ শেষ পেজ (totalPages) এর আগ পর্যন্ত সেট করা হলো
+      if (totalPages > 1) {
+          // loopEnd কে totalPages - 1 পর্যন্ত সীমাবদ্ধ করা হলো
+          loopEnd = Math.min(endPage, totalPages - 1); 
+      }
+      
+      for (let i = loopStart; i <= loopEnd; i++) {
+          
+          const button = createPaginationButton(i, i);
+          if (i === currentPage) {
+             button.classList.add('active-page'); 
+          }
+          paginationContainer.appendChild(button);
+      }
+
+      // 5. শেষ ellipsis (...)
+      // ellipsis দেখাবে যদি লুপের শেষ পেজ (loopEnd) শেষ পেজটির (totalPages) থেকে অন্তত দুই ঘর কম হয়
+      if (loopEnd < totalPages - 1) { 
+          paginationContainer.appendChild(createEllipsis());
+      }
+      
+      // 6. শেষ পেজ বাটন (যদি এটি 1 নম্বর পেজ না হয় এবং লুপে যোগ না হয়ে থাকে)
+      // ✅ FIX 2: সরল লজিক: যদি loopEnd শেষ পেজের চেয়ে কম হয় (অর্থাৎ শেষ পেজটি যোগ হয়নি), তাহলে যোগ করো।
+      if (totalPages > 1 && totalPages > loopEnd) {
+          const lastPageButton = createPaginationButton(totalPages, totalPages);
+          if (currentPage === totalPages) {
+              lastPageButton.classList.add('active-page');
+          }
+          paginationContainer.appendChild(lastPageButton);
+      }
+
+      // 7. '>>' বাটন
+      const nextButton = createPaginationButton('>>', currentPage + 1);
+      if (currentPage === totalPages) {
+          nextButton.classList.add('disabled-nav'); 
+      }
+      paginationContainer.appendChild(nextButton);
+      
+  }
+
+
+  function createPaginationButton(text, page) {
+      const link = document.createElement('a'); 
+      link.innerText = text;
+      link.href = '#';
+      link.classList.add('page-link'); 
+      link.setAttribute('data-page', page);
+      
+      link.addEventListener('click', (e) => {
+          if (link.classList.contains('disabled-nav')) {
+              e.preventDefault();
+              return;
+          }
+          e.preventDefault(); 
+          changePage(page);
+      });
+      
+      if (isNaN(parseInt(text))) {
+          link.classList.add('nav-button');
+      }
+      return link;
+  }
+
+  function createEllipsis() {
+      const span = document.createElement('span');
+      span.innerText = '...';
+      span.classList.add('ellipsis');
+      return span;
+  }
+  
+  function changePage(page) {
+      const totalItems = getFilteredTransactions().length; 
+      const newTotalPages = Math.ceil(totalItems / rowsPerPage);
+      
+      if (page >= 1 && page <= newTotalPages) {
+          currentPage = page; 
+          
+          displayTransactions();
+          setupPagination();
+      }
+  }
+
+
+  function changeRowsPerPage(newRowsPerPage) {
+      rowsPerPage = parseInt(newRowsPerPage); 
+      currentPage = 1; 
+      
+      displayTransactions();
+      setupPagination();
+  }
+  
+  function filterByCategory() {
+   
+      currentPage = 1;
+      displayTransactions(); 
+      setupPagination();
+      updateResultAmount(); 
+      
+      // আউট ক্যাটাগরি চেঞ্জ হলে স্যালারি ড্রপডাউন টগল করা 
+      const outCategorySelect = document.getElementById('outcategory');
+      if (outCategorySelect && outCategorySelect.value === '💵Salary💶') {
+          // এটি ফিল্টার ক্যাটাগরির জন্য, তাই এখানে toggleSalaryEmployeeSelect() ব্যবহার করা যাবে না। 
+          // এর জন্য আলাদা ফাংশন দরকার হবে।
+      }
+  }
+  
+  // নতুন ইভেন্ট লিসেনার যোগ করা
+  const outCategorySelect = document.getElementById('outcategory');
+  if (outCategorySelect) {
+      outCategorySelect.addEventListener('change', toggleSalaryEmployeeSelect);
+  }
+
+
+  // =======================================================
+  // === কলাম টগল ও অন্যান্য ফাংশন (আগের মতো) ===
+  // =======================================================
+  
+  document.getElementById('columnDropdown').addEventListener('change', function(event) {
+      if (event.target.type === 'checkbox') {
+          const columnIndex = event.target.dataset.column;
+          const columnClass = `hidden-col-${columnIndex}`;
+          
+          const header = document.querySelector('.transaction-table-header');
+          const bodyRows = document.querySelectorAll('#transactionBody .transaction-item');
+
+          if (event.target.checked) {
+              header.classList.remove(columnClass);
+              bodyRows.forEach(row => row.classList.remove(columnClass));
+          } else {
+              header.classList.add(columnClass);
+              bodyRows.forEach(row => row.classList.add(columnClass));
+          }
+      }
+  });
+
+  document.getElementById('toggleColumnsBtn').addEventListener('click', function() {
+      const dropdown = document.getElementById('columnDropdown');
+      
+      if (dropdown.style.display === 'block') {
+          dropdown.style.display = 'none';
+      } else {
+          dropdown.style.display = 'block';
+      }
+  });
+  
+  document.addEventListener('click', function(event) {
+      const dropdown = document.getElementById('columnDropdown');
+      const button = document.getElementById('toggleColumnsBtn');
+      
+      if (dropdown.style.display === 'block' && event.target !== dropdown && event.target !== button) {
+           dropdown.style.display = 'none';
+      }
+  });
+
+  document.querySelectorAll('#transactionBody > div').forEach(function(el) {
+      if (!el.classList.contains('transaction-item')) {
+          el.classList.add('transaction-item');
+      }
+  });
+
+
+  // =======================================================
+  // === ড্রপডাউন পূরণের ফাংশন (আপডেট করা) ===
+  // =======================================================
+
+function populateFormSelects() {
+    // ইন ক্যাটাগরি
+    populateSelect('incategory', IN_CATEGORIES_HTML, false, 'প্রজেক্ট 🔬');
+    // ইন পার্সন (জমা করা, ব্যাংক ডিপি)
+    populateSelect('inperson', IN_PERSONS_HTML, false, 'জমা💰করা');
+    
+    // আউট ক্যাটাগরি
+    populateSelect('outcategory', OUT_CATEGORIES, false, 'বাজার🛍️সদাই');
+    // আউট পার্সন (জমা টাকা, ব্যাংক চেক)
+    populateSelect('outperson', OUT_PERSONS, false, cashOutPerson);
+}
+
+
+function loadSelectOptions() {
+    
+    // **[নতুন]** - Database থেকে Employee List লোড করা
+    EMPLOYEES_LIST = loadEmployeesFromDatabase(); 
+    
+    // A. ইনপুট ফর্ম ড্রপডাউনগুলি পূরণ করা
+    populateFormSelects(); 
+    
+    // B. স্যালারি ড্রপডাউন পূরণ করা
+    populateSalaryEmployeeSelect(); 
+    
+    // C. ফিল্টার ড্রপডাউন পূরণ করা
+    const allCategories = [...IN_CATEGORIES_HTML, ...OUT_CATEGORIES];
+    populateSelect('categoryFilter', allCategories, true); 
+}
+
+function populateSelect(elementId, optionsArray, isFilter = false, defaultValue = '') {
+    const selectElement = document.getElementById(elementId);
+    if (!selectElement) return;
+
+    // হার্ডকোড করা অপশনগুলি সরিয়ে দেওয়া
+    if (!isFilter) {
+         selectElement.innerHTML = '';
+    }
+    
+    // HTML-এ হার্ডকোড করা অপশনগুলি ধরে রাখা (ফিল্টারের জন্য)
+    const existingOptions = Array.from(selectElement.options).map(opt => opt.value);
+    
+    // নতুন অপশন যোগ করা
+    optionsArray.forEach(optionValue => {
+        if (!existingOptions.includes(optionValue) || !isFilter) {
+            const option = document.createElement('option');
+            option.value = optionValue;
+            option.textContent = optionValue;
+            selectElement.appendChild(option);
+        }
+    });
+    
+    // ডিফল্ট ভ্যালু সেট করা
+    if (defaultValue && selectElement.querySelector(`option[value="${defaultValue}"]`)) {
+        selectElement.value = defaultValue;
+    } else if (selectElement.options.length > 0) {
+        // যদি ডিফল্ট না থাকে, তবে প্রথমটি সেট করা
+        selectElement.selectedIndex = 0;
+    }
+}
+
+
+// =======================================================
+// === ডেট রেঞ্জ ফিল্টার UI/UX ফাংশন (চূড়ান্ত ফিক্স) ===
+// =======================================================
+
+function openDateRangeModal() {
+    // Modal খোলা
+    document.getElementById('dateRangeModal').style.display = 'flex';
+    
+    // বর্তমান মান Modal ইনপুটে লোড করা
+    const startDateInput = document.getElementById('startDateFilter');
+    const endDateInput = document.getElementById('endDateFilter');
+    const dateFilterBtn = document.getElementById('dateFilterBtn');
+    
+    // যদি ডেট সিলেক্ট করা থাকে, তবে Modal-এ তা দেখাবে
+    if (dateFilterBtn.dataset.startDate) {
+        startDateInput.value = dateFilterBtn.dataset.startDate;
+        endDateInput.value = dateFilterBtn.dataset.endDate;
+    } else {
+        startDateInput.value = '';
+        endDateInput.value = '';
+    }
+}
+
+function setDateRangeAndFilter() {
+    const startDateInput = document.getElementById('startDateFilter');
+    const endDateInput = document.getElementById('endDateFilter');
+    const dateFilterBtn = document.getElementById('dateFilterBtn');
+    const clearDateBtn = document.getElementById('clearDateBtn');
+    
+    const startDateVal = startDateInput.value;
+    const endDateVal = endDateInput.value;
+    
+    // যদি একটি ডেটও নির্বাচন করা হয়
+    if (startDateVal || endDateVal) {
+        
+        // বাটনের ডেটা সেট করা
+        dateFilterBtn.dataset.startDate = startDateVal;
+        dateFilterBtn.dataset.endDate = endDateVal;
+        
+        // বাটনে কোনো তারিখের টেক্সট পরিবর্তন হবে না।
+        dateFilterBtn.classList.add('filter-active'); 
+        
+        // ❌ বাটনটি দেখান
+        if (clearDateBtn) {
+           clearDateBtn.style.display = 'inline-block'; 
+        }
+        
+        // Modal বন্ধ করা
+        const dateRangeModal = document.getElementById('dateRangeModal');
+        if(dateRangeModal) dateRangeModal.style.display = 'none';
+        
+        // ফিল্টার প্রয়োগ করা
+        applyFilters(); 
+        
+    } else {
+         // যদি কোনো ডেট সিলেক্ট না করেই "প্রয়োগ করুন" ক্লিক করে
+        clearDateRange();
+        
+        // Modal বন্ধ করা
+        const dateRangeModal = document.getElementById('dateRangeModal');
+        if(dateRangeModal) dateRangeModal.style.display = 'none';
+    }
+    
+}
+
+function clearDateRange() {
+    const dateFilterBtn = document.getElementById('dateFilterBtn');
+    const clearDateBtn = document.getElementById('clearDateBtn');
+    
+    // বাটনের ডেটা রিসেট করা
+    dateFilterBtn.dataset.startDate = '';
+    dateFilterBtn.dataset.endDate = '';
+
+    // বাটনের active ক্লাস থাকলে সেটি সরিয়ে দিন
+    dateFilterBtn.classList.remove('filter-active');
+
+    // ডিলিট আইকন লুকিয়ে রাখা
+    if (clearDateBtn) {
+        clearDateBtn.style.display = 'none';
+    }
+    
+    // ফিল্টার পুনরায় প্রয়োগ করা
+    applyFilters(); 
+}
+
+
+
+  // =======================================================
+  // === পেজ লোড হলে শুরু করা ===
+  // =======================================================
+
+  window.onload = function() {
+    calculateAndDisplayBalance();
+    
+    // ফিল্টার অপশন লোড করা 
+    loadSelectOptions(); 
+    
+    const rowsSelect = document.getElementById('rowsPerPageSelect');
+    if (rowsSelect) {
+      rowsPerPage = parseInt(rowsSelect.value); 
+    }
+
+    displayTransactions();
+    setupPagination();
+    
+    const now = new Date();
+    const today = now.toISOString().substring(0, 10);
+    
+    // Date input সেট করা (ফর্মের জন্য)
+    const datePickerIn = document.getElementById("datePickerIn");
+    if(datePickerIn) datePickerIn.value = today;
+    const showDateIn = document.getElementById("showDateIn");
+    if(showDateIn) showDateIn.innerText = today;
+    
+    const datePickerOut = document.getElementById("datePickerOut");
+    if(datePickerOut) datePickerOut.value = today;
+    const showDateOut = document.getElementById("showDateOut");
+    if(showDateOut) showDateOut.innerText = today;
+
+    
+    // লোড হওয়ার সময় ডেট ফিল্টার UI সেট করা
+    clearDateRange(); 
+  };
+
+
+</script>
+
+
+
+</body>
+</html>
