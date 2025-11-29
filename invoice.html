@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>কর্মচারী যোগ করা</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: #f5f7fa;
+    }
+    .navbar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: white;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      padding: 15px 20px;
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 10;
+    }
+    .menu-icon {
+      position: absolute;
+      left: 20px;
+      font-size: 22px;
+      cursor: pointer;
+    }
+    .navbar h1 {
+      font-size: 25px;
+      margin: 0;
+      font-weight: 700;
+    }
+    .main-content {
+      margin-top: 90px;
+      padding: 20px;
+    }
+    
+    
+    /* Sidebar */
+    .sidebar {
+      position: fixed;
+      top: 65px;
+      left: -260px;
+      width: 230px;
+      height: 100%;
+      background: #9CC6ED;
+      transition: 0.3s;
+      padding-top: 20px;
+      z-index: 9;
+    }
+    
+    
+        .sidebar.open {
+      left: 0;
+    }
+
+    .sidebar a {
+      display: block;
+      padding: 15px 20px;
+      color: black;
+      text-decoration: none;
+      font-size: 16px;
+      transition: 0.2s;
+    }
+
+    .sidebar a:hover {
+      background: #87b8e0;
+    }
+
+    
+    
+    
+  </style>
+</head>
+<body>
+
+  <div class="navbar">
+    <span class="menu-icon" onclick="toggleSidebar()">☰</span>
+     <h1>invoice</h1>
+  </div>
+
+  <div id="sidebar" class="sidebar">
+    <a href="index.html">🏠 ড্যাশবোর্ড</a>
+    <a href="Hisab.html">💰 হিসাব রাখা</a>
+    <a href="employee-list.html">🧑‍🤝‍🧑 Company People</a>
+     <a href="invoice.html">📑 বিল invoice</a>
+  </div>
+
+  <div class="main-content">
+    <h2>👨‍💼 কর্মচারীদের তালিকা</h2>
+    <p>এখানে কর্মচারীদের ডেটা দেখানো হবে।</p>
+  </div>
+  
+  
+  
+  
+  
+<script>
+  function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const mainContent = document.querySelector('.main-content'); // এটি নতুন যোগ করা হয়েছে
+    
+    sidebar.classList.toggle('open');
+    mainContent.classList.toggle('open'); // main-content-এও 'open' টগল করা হলো
+  }
+
+  // সাইডবারের লিঙ্কে ক্লিক করলে সাইডবার বন্ধ করার কোডটি ঠিক আছে
+  document.querySelectorAll('.sidebar a').forEach(link => {
+    link.addEventListener('click', () => {
+      document.getElementById('sidebar').classList.remove('open');
+      document.querySelector('.main-content').classList.remove('open'); // বন্ধ করার সময় এটিও remove করতে হবে
+    });
+  });
+</script>
+
+
+
+</body>
+</html>

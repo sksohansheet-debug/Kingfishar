@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>কর্মচারী লিস্ট</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* ------------------------------------------------------------------ */
+    /* ১. সাধারণ এবং কাঠামো CSS (আগের মতোই রাখা হলো) */
+    /* ------------------------------------------------------------------ */
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: #f5f7fa;
+      color: #333;
+    }
+    .navbar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: white;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      padding: 15px 20px;
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 10;
+    }
+    .menu-icon {
+      position: absolute;
+      left: 20px;
+      font-size: 22px;
+      cursor: pointer;
+    }
+    .navbar h1 {
+      font-size: 25px;
+      margin: 0;
+      font-weight: 700;
+    }
+    .main-content {
+      margin-top: 90px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    /* Sidebar */
+    .sidebar {
+      position: fixed;
+      top: 65px;
+      left: -260px;
+      width: 230px;
+      height: 100%;
+      background: #9CC6ED;
+      transition: 0.3s;
+      padding-top: 20px;
+      z-index: 9;
+    }
+    .sidebar.open {
+      left: 0;
+    }
+    .sidebar a {
+      display: block;
+      padding: 15px 20px;
+      color: black;
+      text-decoration: none;
+      font-size: 16px;
+      transition: 0.2s;
+    }
+    .sidebar a:hover {
+      background: #87b8e0;
+    }
+
+    /* Add Button */
+    .Add-Pepoles {
+         width: 100%;
+         display: flex;
+         justify-content: flex-end;
+         margin-top: -30px; 
+         margin-right: 15px; 
+         margin-bottom: 20px;
+    }
+    .Add-Pepole {
+        background-color: blue; 
+        color: white; 
+        border: none;
+        border-radius: 5px; 
+        padding: 8px 15px;
+        cursor: pointer;
+        font-size: 15px;
+        font-weight: bold;
+        height: 35px;
+        width: 100px;
+    }
+        
+    /* --- Modal Styles --- */
+    .modal {
+      display: none; 
+      position: fixed; 
+      z-index: 20; 
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.4); 
+    }
+    .modal-content {
+      background-color: #fefefe;
+      margin: 10% auto;
+      padding: 25px;
+      border: 1px solid #888;
+      width: 90%; 
+      max-width: 500px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+    }
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    
+    /* Form Grid Layout */
+    .modal-content h3 {
+      grid-column: 1 / 3; 
+      text-align: center;
+      margin-top: 20px;
+      margin-bottom: 25px; 
+      border-bottom: 2px solid #eee; 
+      padding-bottom: 10px;
+    }
+    .modal-content form {
+        display: grid;
+        grid-template-columns: 140px 1fr;
+        gap: 15px;
+        align-items: center; 
+    }
+    .modal-content input[type="text"],
+    .modal-content input[type="email"],
+    .modal-content input[type="tel"],
+    .modal-content input[type="number"],
+    .modal-content input[type="date"],
+    .modal-content select,
+    .modal-content textarea {
+        width: 95%;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+    .modal-content textarea {
+        grid-column: 2 / 3;
+        height: 60px;
+        resize: vertical;
+    }
+    .modal-content input[type="file"],
+    .modal-content button[type="submit"] {
+        grid-column: 1 / 3; 
+        width: 95%;
+        margin-left: 2%; 
+    }
+    .modal-content button[type="submit"] {
+        display: block;
+        margin: 20px auto 0 auto;
+        width: 50%; 
+        padding: 10px;
+        background-color: blue;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+    .modal-content br {
+        display: none; 
+    }
+
+
+    /* ------------------------------------------------------------------ */
+    /* ২. টেবিল এবং ডিটেইলস CSS (আগের মতোই রাখা হলো) */
+    /* ------------------------------------------------------------------ */
+
+    /* টেবিলকে স্ক্রল করার জন্য কন্টেইনার */
+    .table-responsive {
+        width: 100%;
+        overflow-x: auto; 
+        -webkit-overflow-scrolling: touch; 
+    }
+    
+    /* তালিকা টেবিল স্টাইল */
+    .employee-table {
+        min-width: 750px; 
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        background: white;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .employee-table th, .employee-table td {
+        padding: 12px 10px;
+        border: 1px solid #ddd;
+        text-align: left;
+        vertical-align: middle; 
+        font-size: 14px;
+    }
+    
+    /* কলাম প্রস্থ নিয়ন্ত্রণ */
+    .employee-table th:nth-child(1), .employee-table td:nth-child(1) { width: 5%; } 
+    .employee-table th:nth-child(2), .employee-table td:nth-child(2) { width: 8%; } 
+    .employee-table th:nth-child(3), .employee-table td:nth-child(3) { width: 20%; } 
+    .employee-table th:nth-child(4), .employee-table td:nth-child(4) { width: 15%; } 
+    .employee-table th:nth-child(5), .employee-table td:nth-child(5) { width: 15%; } 
+    .employee-table th:nth-child(6), .employee-table td:nth-child(6) { width: 15%; } 
+    .employee-table th:nth-child(7), .employee-table td:nth-child(7) { width: 20%; } 
+
+
+    .employee-table th {
+        background-color: #f2f2f2;
+        font-weight: bold;
+    }
+
+    .employee-table tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+
+    /* বেতন স্ট্যাটাস স্টাইল */
+    .status-paid {
+        background-color: #d4edda;
+        color: #155724;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-weight: bold;
+        display: inline-block;
+        font-size: 12px;
+    }
+    .status-pending {
+        background-color: #fff3cd;
+        color: #856404;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-weight: bold;
+        display: inline-block;
+        font-size: 12px;
+    }
+    .status-advance {
+        background-color: #f8d7da;
+        color: #721c24;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-weight: bold;
+        display: inline-block;
+        font-size: 12px;
+    }
+    
+    /* অ্যাকশন বাটন স্টাইল */
+    .action-buttons button {
+        background-color: #007bff; 
+        color: white;
+        border: none;
+        padding: 5px 8px;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-right: 5px;
+        font-size: 14px;
+        white-space: nowrap; 
+    }
+
+    .action-buttons button.delete-btn {
+        background-color: red; 
+    }
+
+    /* ছবি স্টাইল */
+    .profile-img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 1px solid #ccc;
+        display: block;
+        margin: auto;
+    }
+
+    /* ডিটেইলস মোডাল ডিসপ্লে স্টাইল */
+    .detail-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px dashed #eee;
+        font-size: 14px;
+    }
+
+    .detail-item strong {
+        color: #0056b3;
+    }
+    .detail-item span {
+        font-weight: 500;
+        text-align: right;
+    }
+  </style>
+</head>
+<body>
+  
+  <div class="navbar">
+    <span class="menu-icon" onclick="toggleSidebar()">☰</span>
+    <h1>Company People</h1>
+  </div>
+
+  <div id="sidebar" class="sidebar">
+    <a href="index.html">🏠 ড্যাশবোর্ড</a>
+    <a href="Hisab.html">💰 হিসাব রাখা</a>
+    <a href="employee-list.html">🧑‍🤝‍🧑 Company People</a>
+    <a href="invoice.html">📑 বিল invoice</a>
+  </div>
+
+  <div class="main-content">
+    
+    <div class="header-content">
+        <h2>👨‍💼 কর্মচারীদের তালিকা</h2>
+        <p>এখানে কর্মচারীদের ডেটা দেখানো হবে।</p>
+    </div>
+    
+    <div class="Add-Pepoles">
+      <button class="Add-Pepole" onclick="openForm()">Add➕</button>
+    </div>
+    
+    <div id="employeeListContainer">
+      </div>
+  </div>
+      
+    
+  <div id="addFormModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeForm()">&times;</span>
+      <h3>Add People</h3>
+    
+      <form id="employeeForm"> 
+        
+        <h3>ব্যক্তিগত তথ্য</h3>
+        
+        <label for="name">নাম:</label>
+        <input type="text" id="name" name="name" placeholder="সম্পূর্ণ নাম" required>
+        
+        <label for="fatherName">Father Name:</label>
+        <input type="text" id="fatherName" name="fatherName" placeholder="Father Name">
+        
+        <label for="dob">Date Of Birth:</label>
+        <input type="date" id="dob" name="dob" required>
+
+        <label for="religion">ধর্ম:</label>
+        <select id="religion" name="religion" required>
+            <option value="">নির্বাচন করুন</option>
+            <option value="Islam">ইসলাম</option>
+            <option value="Hinduism">হিন্দু ধর্ম</option>
+            <option value="Christianity">খ্রিস্ট ধর্ম</option>
+            <option value="Buddhism">বৌদ্ধ ধর্ম</option>
+            <option value="Other">অন্যান্য</option>
+        </select>
+        
+        <label for="bloodGroup">রক্তের গ্রুপ:</label>
+        <select id="bloodGroup" name="bloodGroup">
+            <option value="">নির্বাচন করুন</option>
+            <option value="A+">A+</option>
+            <option value="A-">A-</option>
+            <option value="B+">B+</option>
+            <option value="B-">B-</option>
+            <option value="AB+">AB+</option>
+            <option value="AB-">AB-</option>
+            <option value="O+">O+</option>
+            <option value="O-">O-</option>
+        </select>
+        
+        <label for="nidNo">NID NO:</label>
+        <input type="text" id="nidNo" name="nidNo" placeholder="NID NO" required>
+        
+        <h3>যোগাযোগ ও জরুরী তথ্য</h3>
+        
+        <label for="mobileNo">মোবাইল নম্বর:</label>
+        <input type="tel" id="mobileNo" name="mobileNo" placeholder="মোবাইল নম্বর" required>
+        
+        <label for="email">ইমেইল:</label>
+        <input type="email" id="email" name="email" placeholder="example@gmail.com" required>
+        
+        <label for="address">বর্তমান ঠিকানা:</label>
+        <input type="text" id="address" name="address" placeholder="ঠিকানা" required>
+
+        <label for="emergencyContact">জরুরী যোগাযোগ:</label>
+        <input type="tel" id="emergencyContact" name="emergencyContact" placeholder="জরুরী নম্বর">
+
+        <h3>চাকরির তথ্য</h3>
+        
+        <label for="designation">পদবি:</label>
+        <input type="text" id="designation" name="designation" placeholder="পদবি" required>
+
+        <label for="jobType">চাকরির ধরন:</label>
+        <select id="jobType" name="jobType" required>
+            <option value="">নির্বাচন করুন</option>
+            <option value="Permanent">স্থায়ী</option>
+            <option value="Contractual">চুক্তিভিত্তিক</option>
+            <option value="Part-time">খণ্ডকালীন</option>
+            <option value="Intern">ইন্টার্ন</option>
+        </select>
+
+        <label for="joiningDate">যোগদানের তারিখ:</label>
+        <input type="date" id="joiningDate" name="joiningDate" required>
+        
+        <label for="salary">মাসিক বেতন:</label>
+        <input type="number" id="salary" name="salary" placeholder="বেতন (টাকা)" required>
+        
+        <h3>শিক্ষাগত যোগ্যতা ও অভিজ্ঞতা</h3>
+
+        <label for="education">শিক্ষাগত যোগ্যতা:</label>
+        <input type="text" id="education" name="education" placeholder="যেমন: B.Sc. in CSE" required>
+        
+        <label for="experience">অভিজ্ঞতা (সংক্ষেপে):</label>
+        <textarea id="experience" name="experience" rows="3" placeholder="পূর্ববর্তী কাজের বিবরণ..."></textarea>
+
+        <label for="photo">কর্মচারীর ছবি:</label>
+        <input type="file" id="photo" name="photo" accept="image/*">
+        
+        <button type="submit" id="submitBtn">যোগ করুন</button>
+      </form>
+    
+    
+    </div>
+  </div>
+  
+  
+  <div id="detailsModal" class="modal">
+    <div class="modal-content" style="max-width: 400px;">
+      <span class="close" onclick="closeDetailsModal()">&times;</span>
+      <h3 style="margin-top: 10px;">কর্মচারীর বিস্তারিত তথ্য</h3>
+      <div id="employeeDetailsDisplay">
+          </div>
+      <button onclick="closeDetailsModal()" style="display: block; width: 100%; margin-top: 20px; background: #6c757d;">বন্ধ করুন</button>
+    </div>
+  </div>
+
+
+<script>
+  
+  // Modal এবং Sidebar ফাংশন
+  function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    sidebar.classList.toggle('open');
+  }
+
+  function openForm() {
+    document.getElementById("addFormModal").style.display = "block";
+  }
+
+  function closeForm() {
+    document.getElementById("addFormModal").style.display = "none";
+    document.getElementById('employeeForm').reset();
+  }
+  
+  function closeDetailsModal() {
+    document.getElementById("detailsModal").style.display = "none";
+  }
+
+  window.onclick = function(event) {
+    const modal = document.getElementById("addFormModal");
+    const detailsModal = document.getElementById("detailsModal");
+    if (event.target === modal) {
+      closeForm();
+    }
+    if (event.target === detailsModal) {
+      closeDetailsModal();
+    }
+  }
+
+  // ⭐ ডেটা সেভ করার সাব-ফাংশন ⭐
+  function saveAndReload(employee) {
+    
+    let employees = JSON.parse(localStorage.getItem('employees')) || [];
+    
+    // নতুন ID তৈরি করা 
+    const newId = employees.length > 0 ? Math.max(...employees.map(e => e.id || 0)) + 1 : 101;
+    employee.id = newId;
+
+    // নিশ্চিত করা হচ্ছে যে 'salary' একটি সংখ্যা হিসেবে সেভ হচ্ছে
+    employee.salary = parseFloat(employee.salary) || 0; 
+    
+    // স্যালারি পেমেন্ট স্ট্যাটাস ইনিশিয়ালাইজ করা
+    employee.salaryPaid = parseFloat(employee.salaryPaid) || 0; 
+    employee.lastPaidDate = employee.lastPaidDate || null;
+
+    employees.push(employee);
+    
+    try {
+        localStorage.setItem('employees', JSON.stringify(employees));
+        alert('কর্মচারী সফলভাবে যোগ করা হয়েছে!'); 
+        closeForm(); 
+        loadEmployeeList(); 
+    } catch (e) {
+        // যদি এখনও Local Storage ত্রুটি আসে, তাহলে সাইজ চেক করতে হবে।
+        alert('Local Storage সেভ করার সময় একটি চরম ত্রুটি হয়েছে। দয়া করে ব্রাউজারের ক্যাশ ও কুকিজ পরিষ্কার করুন।');
+        console.error(e);
+    }
+  }
+
+  // ⭐ ফর্ম ভ্যালিডেশন এবং ডেটা সেভ (ছবি লোডিং ফিক্স করা হলো) ⭐
+  const form = document.getElementById('employeeForm');
+  
+  form.addEventListener('submit', function(event) {
+    event.preventDefault(); 
+
+    if (!form.checkValidity()) {
+        const firstInvalid = form.querySelector(':invalid');
+        if (firstInvalid) {
+            firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            firstInvalid.focus();
+        }
+        return; 
+    }
+    
+    const employee = {};
+    const formData = new FormData(form);
+    
+    for (const [key, value] of formData.entries()) {
+        employee[key] = value;
+    }
+    
+    // ✅ ফিক্স: ছবি ফাইল লোড করার কোড বাদ দেওয়া হলো। 
+    // শুধু একটি খালি ডেটা URL সেট করা হচ্ছে।
+    employee.photoDataUrl = ''; 
+    saveAndReload(employee);
+  });
+
+  // ⭐ বেতন স্ট্যাটাস ক্যালকুলেশন এবং ডিসপ্লে ⭐
+  function getSalaryStatus(emp) {
+    const today = new Date();
+    const salaryAmount = emp.salary || 0; 
+    const totalPaid = parseFloat(emp.salaryPaid) || 0; 
+    const lastPaidDateStr = emp.lastPaidDate; 
+    let status = '';
+    const currency = '৳'; 
+
+    if (salaryAmount === 0) {
+        return `${currency}${totalPaid.toFixed(0)} (বেতন সেট নেই)`; 
+    }
+
+    if (totalPaid > 0 && lastPaidDateStr) {
+        const lastPaymentDate = new Date(lastPaidDateStr);
+        const isPaidThisMonth = lastPaymentDate.getMonth() === today.getMonth() && lastPaymentDate.getFullYear() === today.getFullYear();
+
+        if (isPaidThisMonth) {
+            if (totalPaid > salaryAmount) {
+                 const advanceAmount = totalPaid - salaryAmount;
+                 status = `<span class="status-advance">Advance: ${currency}${advanceAmount.toFixed(0)}</span>`;
+            } else {
+                 status = `<span class="status-paid">Paid (${lastPaymentDate.toLocaleDateString('bn-BD')})</span>`;
+            }
+        } else if (totalPaid >= salaryAmount) {
+            const dueAmount = salaryAmount - totalPaid;
+            status = `<span class="status-advance">Advance: ${currency}${Math.abs(dueAmount).toFixed(0)}</span>`;
+        } else {
+            status = `<span class="status-pending">Due: ${currency}${salaryAmount.toFixed(0)}</span>`;
+        }
+    } else {
+         status = `<span class="status-pending">Due: ${currency}${salaryAmount.toFixed(0)}</span>`;
+    }
+
+    return status;
+  }
+  
+  
+  // ⭐ লোকাল স্টোরেজ থেকে ডেটা লোড করে তালিকায় দেখানোর ফাংশন ⭐
+  function loadEmployeeList() {
+      const employees = JSON.parse(localStorage.getItem('employees')) || []; 
+      const listContainer = document.getElementById('employeeListContainer');
+      listContainer.innerHTML = ''; 
+
+      if (employees.length === 0) {
+          listContainer.innerHTML = '<p style="text-align: center; margin-top: 50px; font-style: italic; color: #777;">কোনো কর্মচারীর ডেটা পাওয়া যায়নি।</p>';
+          return;
+      }
+      
+      let tableHTML = `
+          <div class="table-responsive"> 
+              <table class="employee-table">
+                  <thead>
+                      <tr>
+                          <th>SL</th>
+                          <th>ছবি</th>
+                          <th>নাম</th>
+                          <th>পদবি</th>  
+                          <th>মোবাইল</th> 
+                          <th>বেতন স্ট্যাটাস</th> <th>অ্যাকশন</th>
+                      </tr>
+                  </thead>
+                  <tbody>
+      `;
+      
+      employees.forEach((emp, index) => {
+          // ✅ ফিক্স: ডিফল্ট ছবি URL সেট করা হলো
+          const imgSrc = emp.photoDataUrl && emp.photoDataUrl !== 'undefined' ? emp.photoDataUrl : 'https://via.placeholder.com/40?text=P'; 
+          
+          tableHTML += `
+              <tr>
+                  <td>${index + 1}</td>
+                  <td><img src="${imgSrc}" class="profile-img" alt="${emp.name}"></td>
+                  <td>${emp.name || 'N/A'}</td>
+                  <td>${emp.designation || 'N/A'}</td> 
+                  <td>${emp.mobileNo || 'N/A'}</td>   
+                  <td>${getSalaryStatus(emp)}</td>  <td class="action-buttons">
+                      <button onclick="showEmployeeDetails(${index})">Details</button>
+                      <button class="delete-btn" onclick="deleteEmployee(${index})">Delete</button>
+                  </td>
+              </tr>
+          `;
+      });
+      
+      tableHTML += `
+                  </tbody>
+              </table>
+          </div> 
+      `;
+      
+      listContainer.innerHTML = tableHTML;
+  }
+  
+  // ⭐ কর্মচারী মোছার ফাংশন (কনফার্মেশন সহ) ⭐
+  function deleteEmployee(index) {
+      if (confirm("আপনি কি নিশ্চিত এই কর্মীকে মুছে ফেলতে চান? এই ডেটা আর ফিরে পাওয়া যাবে না।")) {
+          let employees = JSON.parse(localStorage.getItem('employees')) || [];
+          employees.splice(index, 1); 
+          localStorage.setItem('employees', JSON.stringify(employees));
+          loadEmployeeList(); 
+      }
+  }
+
+  // ⭐ ডিটেইলস দেখানোর ফাংশন ⭐
+  function showEmployeeDetails(index) {
+      const employees = JSON.parse(localStorage.getItem('employees')) || [];
+      const emp = employees[index];
+      const displayContainer = document.getElementById('employeeDetailsDisplay');
+      
+      const imgSrc = emp.photoDataUrl && emp.photoDataUrl !== 'undefined' ? emp.photoDataUrl : 'https://via.placeholder.com/80?text=P'; 
+      
+      let detailsHTML = `
+          <div style="text-align: center; margin-bottom: 20px;">
+              <img src="${imgSrc}" class="profile-img" style="width: 80px; height: 80px; margin-bottom: 10px;" alt="${emp.name}">
+              <h4 style="margin: 0; color: #007bff;">${emp.name || 'N/A'}</h4>
+              <p style="color: #6c757d;">${emp.designation || 'পদবি নেই'}</p>
+          </div>
+          
+          <div class="detail-item">
+              <strong>যোগদান তারিখ:</strong> <span>${emp.joiningDate || 'N/A'}</span>
+          </div>
+          <div class="detail-item">
+              <strong>মোবাইল:</strong> <span>${emp.mobileNo || 'N/A'}</span>
+          </div>
+          <div class="detail-item">
+              <strong>ইমেইল:</strong> <span>${emp.email || 'N/A'}</span>
+          </div>
+          <div class="detail-item">
+              <strong>NID NO:</strong> <span>${emp.nidNo || 'N/A'}</span>
+          </div>
+          <div class="detail-item">
+              <strong>ঠিকানা:</strong> <span>${emp.address || 'N/A'}</span>
+          </div>
+          <div class="detail-item">
+              <strong>মাসিক বেতন:</strong> <span>${emp.salary ? emp.salary + ' টাকা' : 'N/A'}</span>
+          </div>
+          <div class="detail-item">
+              <strong>মোট বেতন পরিশোধ:</strong> <span style="font-weight: bold; color: green;">${emp.salaryPaid ? emp.salaryPaid + ' টাকা' : '০ টাকা'}</span>
+          </div>
+          <div class="detail-item">
+              <strong>শেষ পরিশোধের তারিখ:</strong> <span>${emp.lastPaidDate || 'N/A'}</span>
+          </div>
+          <div class="detail-item">
+              <strong>বর্তমান স্ট্যাটাস:</strong> <span>${getSalaryStatus(emp)}</span>
+          </div>
+          <div class="detail-item">
+              <strong>রক্তের গ্রুপ:</strong> <span>${emp.bloodGroup || 'N/A'}</span>
+          </div>
+          <div class="detail-item">
+              <strong>শিক্ষাগত যোগ্যতা:</strong> <span>${emp.education || 'N/A'}</span>
+          </div>
+          <div class="detail-item">
+              <strong>অভিজ্ঞতা:</strong> <span>${emp.experience || 'N/A'}</span>
+          </div>
+      `;
+      
+      displayContainer.innerHTML = detailsHTML;
+      document.getElementById("detailsModal").style.display = "block";
+  }
+
+
+  // পেজ লোড হওয়ার সাথে সাথে তালিকা লোড করা
+  window.onload = function() {
+      loadEmployeeList();
+  };
+  
+</script>
+
+
+
+  
+</body>
+</html>
