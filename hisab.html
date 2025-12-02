@@ -1081,8 +1081,10 @@ width: 200px!important;
 </div>
 
 <script>
+
+
 // =======================================================
-// === ১. ফায়ারবেজ কনফিগারেশন ও ইনিশিয়ালাইজেশন (সংশোধিত) ===
+// === ১. ফায়ারবেজ কনফিগারেশন ও ইনিশিয়ালাইজেশন (চূড়ান্ত ফিক্স) ===
 // =======================================================
 const firebaseConfig = {
   apiKey: "AIzaSyDB9ZXgG1S0Io2OqJc50DkTJotraHJ6tsA",
@@ -1095,26 +1097,37 @@ const firebaseConfig = {
   measurementId: "G-TLH6L18170"
 };
 
+// **গুরুত্বপূর্ণ ফিক্স:** database এবং transactionsRef এখন গ্লোবালি declare করা হয়েছে,
+// কিন্তু কোনো মান assign করা হয়নি।
 let database; 
 let transactionsRef;
 
-// Firebase ইনিশিয়ালাইজেশন
-if (typeof firebase !== 'undefined') {
-    try {
-        const app = firebase.initializeApp(firebaseConfig);
-        database = app.database();
-        transactionsRef = database.ref('transactions'); 
-        
-        // Server Value পাওয়ার জন্য এটি দরকার
-        window.firebaseServerTimestamp = firebase.database.ServerValue.TIMESTAMP;
-        console.log("Firebase initialized successfully.");
-    } catch (e) {
-        console.error("Firebase Initialization Error:", e);
-        alert("Firebase লোড করতে সমস্যা হয়েছে। কনসোল দেখুন।");
+// Firebase ইনিশিয়ালাইজেশন লজিক:
+// এখানে একটি IIFE (Immediately Invoked Function Expression) ব্যবহার করা হয়েছে
+// যাতে ইনিশিয়ালাইজেশনের কাজটি পেজ লোডের শুরুতেই সঠিকভাবে সম্পন্ন হয়।
+(function initializeFirebase() {
+    if (typeof firebase !== 'undefined') {
+        try {
+            const app = firebase.initializeApp(firebaseConfig);
+            // ✅ গ্লোবাল ভ্যারিয়েবলে মান assign করা হয়েছে
+            database = app.database();
+            transactionsRef = database.ref('transactions'); 
+            
+            // Server Value পাওয়ার জন্য এটি দরকার
+            window.firebaseServerTimestamp = firebase.database.ServerValue.TIMESTAMP;
+            console.log("Firebase initialized successfully. Database Ready.");
+            
+        } catch (e) {
+            console.error("Firebase Initialization Error - Check Configuration:", e);
+            alert("Firebase লোড করতে সমস্যা হয়েছে। কনসোল দেখুন।");
+        }
+    } else {
+        console.error("Firebase SDK (v8) লোড হয়নি। HTML-এ <script> ট্যাগ যুক্ত করুন।");
     }
-} else {
-    console.error("Firebase SDK লোড হয়নি। HTML-এ <script> ট্যাগ যুক্ত করুন।");
-}
+})();
+
+// এখন, এই লজিকটি নিশ্চিত করে যে database এবং transactionsRef 
+// সমস্ত ফাংশনের জন্য অ্যাক্সেসযোগ্য এবং সংজ্ঞায়িত হবে, যতক্ষণ না firebase SDK লোড হয়।
 
 
 // =======================================================
