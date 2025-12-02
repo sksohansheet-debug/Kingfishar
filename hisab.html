@@ -833,6 +833,9 @@ width: 200px!important;
     
 </style>
 
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
 </head>
 <body>
 
@@ -1088,227 +1091,239 @@ width: 200px!important;
 
 <script>
 
-  // =======================================================
-  // === গ্লোবাল ডেটা তালিকা ও কনস্ট্যান্টস ===
-  // =======================================================
-
-  // আপনার HTML থেকে OUT ক্যাটাগরিগুলি ম্যানুয়ালি কপি করে নেওয়া হলো
-  const OUT_CATEGORIES = [
-      'বাজার🛍️সদাই', 'যাতায়াত🚕খরচ', 'নাস্তা🥪,লাঞ্চ,🍜', 
-      'এক্সোসেরিজ🛒', 'সার্ভিস🔧কস্ট', 'ঋন দেওয়া♻️', '💵Salary💶'
-  ];
-  const OUT_PERSONS = [
-      'জমা টাকা💵', 'ব্যাংক🔰চেক'
-  ];
-  
-  // আপনার HTML থেকে IN ক্যাটাগরিগুলি ম্যানুয়ালি কপি করে নেওয়া হলো
-  const IN_CATEGORIES_HTML = ['প্রজেক্ট 🔬', '👜RRR Bazar', 'ঋন নেওয়া🩸']; 
-  const IN_PERSONS_HTML = ['জমা💰করা', 'BANK🏦DP']; 
-
-  const kingBankCategory = 'BANK🏦DP'; // ব্যাংক ডিপোজিটের জন্য এটি প্রয়োজন 
-  // গ্লোবাল কনস্ট্যান্ট
-  const cashOutPerson = 'জমা টাকা💵'; 
-  const bankOutPerson = 'ব্যাংক🔰চেক';
-  const loanTakenCategory = 'ঋন নেওয়া🩸';
-  const loanGivenCategory = 'ঋন দেওয়া♻️';
 
 
-// Hishab.html ফাইলের <script> ট্যাগের ভেতরে এটি পরিবর্তন করুন:
 
+</script>
+
+// =======================================================
+// === ১. ফায়ারবেজ কনফিগারেশন ও ইনিশিয়ালাইজেশন ===
+// =======================================================
+
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyDB9ZXgG1S0Io2OqJc50DkTJotraHJ6tsA",
+  authDomain: "kingfishar-data.firebaseapp.com",
+  databaseURL: "https://kingfishar-data-default-rtdb.firebaseio.com",
+  projectId: "kingfishar-data",
+  storageBucket: "kingfishar-data.firebasestorage.app",
+  messagingSenderId: "799117473038",
+  appId: "1:799117473038:web:36e73039a1f36a1195535f",
+  measurementId: "G-TLH6L18170"
+};
+
+// ফায়ারবেজ ইনিশিয়ালাইজ করুন
+if (typeof firebase !== 'undefined') {
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    const transactionsRef = database.ref('transactions'); // 'transactions' নোডে সব ডেটা থাকবে
+    
+    // Server Value পাওয়ার জন্য এটি দরকার
+    window.firebaseServerTimestamp = firebase.database.ServerValue.TIMESTAMP;
+} else {
+    console.error("Firebase SDK লোড হয়নি। HTML-এ <script> ট্যাগ যুক্ত করুন।");
+}
+
+
+// =======================================================
+// === ২. গ্লোবাল ডেটা তালিকা ও কনস্ট্যান্টস (পরিবর্তন হয়নি) ===
+// =======================================================
+
+const OUT_CATEGORIES = [
+    'বাজার🛍️সদাই', 'যাতায়াত🚕খরচ', 'নাস্তা🥪,লাঞ্চ,🍜', 
+    'এক্সোসেরিজ🛒', 'সার্ভিস🔧কস্ট', 'ঋন দেওয়া♻️', '💵Salary💶'
+];
+const OUT_PERSONS = [
+    'জমা টাকা💵', 'ব্যাংক🔰চেক'
+];
+
+const IN_CATEGORIES_HTML = ['প্রজেক্ট 🔬', '👜RRR Bazar', 'ঋন নেওয়া🩸']; 
+const IN_PERSONS_HTML = ['জমা💰করা', 'BANK🏦DP']; 
+
+const kingBankCategory = 'BANK🏦DP';
+const cashOutPerson = 'জমা টাকা💵'; 
+const bankOutPerson = 'ব্যাংক🔰চেক';
+const loanTakenCategory = 'ঋন নেওয়া🩸';
+const loanGivenCategory = 'ঋন দেওয়া♻️';
+
+
+// =======================================================
+// === ৩. গ্লোবাল ভেরিয়েবলস, ডেটা লোডিং ও পেজিনেশন সেটিংস (আপডেট করা হয়েছে) ===
+// =======================================================
+
+// Firebase থেকে ডেটা লোড হবে, তাই localStorage বাদ
+let transactions = []; 
+const today = new Date().toISOString().substring(0, 10);
+
+let rowsPerPage = 10; 
+let currentPage = 1;
+
+let isEditingIndex = null; 
+
+let startDate = null; 
+let endDate = null; 
+
+// Employee List Loading - পরিবর্তন হয়নি
 function loadEmployeesFromDatabase() {
-    // 💡 আপনার employee-list.html এ সেভ করা 'employees' local storage key থেকে ডেটা টানা হচ্ছে
     const employeesJson = localStorage.getItem('employees');
-    
-    // JSON স্ট্রিং থেকে JavaScript অ্যারেতে রূপান্তর করা
     const allEmployees = employeesJson ? JSON.parse(employeesJson) : [];
-    
-    // শুধুমাত্র প্রয়োজনীয় ফিল্ড (id, name, salary) সহ একটি অ্যারে ফেরত দেওয়া হচ্ছে
     return allEmployees.map(emp => ({
         id: emp.id,
         name: emp.name,
-        // নিশ্চিত করা হচ্ছে যে salary একটি সংখ্যা হিসেবে যাচ্ছে
         salary: parseFloat(emp.salary) || 0 
     }));
 }
-// এর পর যে ফাংশনটি ড্রপডাউন তৈরি করে (যেমন: populateSalaryEmployeeSelect()),
-// সেটি এই ফাংশন থেকে পাওয়া তালিকা ব্যবহার করবে।
 
 
-  // =======================================================
-  // === গ্লোবাল ভেরিয়েবলস, ডেটা লোডিং ও পেজিনেশন সেটিংস ===
-  // =======================================================
+// =======================================================
+// === ৪. সাইডবার, ফর্ম ওপেন/ক্লোজ এবং টাইম/ডেট ফাংশন (পরিবর্তন হয়নি) ===
+// =======================================================
 
-  let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
-  const today = new Date().toISOString().substring(0, 10);
-  
-  let rowsPerPage = 10; 
-  let currentPage = 1;
-  
-  // এডিট মোড চেক করা
-  let isEditingIndex = null; 
-  
-  // ডেট ফিল্টার স্টোর করার জন্য গ্লোবাল ভ্যারিয়েবল (যদিও getFilteredTransactions সরাসরি dataset ব্যবহার করে)
-  // এটি রাখা হলো যদি ভবিষ্যতে অন্য কোনো ফাংশন ব্যবহার করে
-  let startDate = null; 
-  let endDate = null; 
-
-  // =======================================================
-  // === সাইডবার, ফর্ম ওপেন/ক্লোজ এবং টাইম/ডেট ফাংশন ===
-  // =======================================================
-
-  function toggleSidebar() {
+function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
     sidebar.classList.toggle('open');
-  }
+}
 
-  document.querySelectorAll('.sidebar a').forEach(link => {
+document.querySelectorAll('.sidebar a').forEach(link => {
     link.addEventListener('click', () => {
-      document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebar').classList.remove('open');
     });
-  });
-
-  
-  function openForm(type) {
-      const formContainer = document.getElementById("formContainer");
-      if (!formContainer) {
-          console.error("HTML Error: formContainer ID not found.");
-          return;
-      }
-      formContainer.style.display = "flex";
-      
-      const TypeCapital = type === 'in' ? 'In' : 'Out';
-
-      if (type === "in") {
-          document.getElementById("formIn").style.display = "block";
-          document.getElementById("formOut").style.display = "none";
-      } else {
-          document.getElementById("formIn").style.display = "none";
-          document.getElementById("formOut").style.display = "block";
-      }
-      
-      // নতুন এন্ট্রি হলে রিসেট নিশ্চিত করা
-      if (isEditingIndex === null) {
-          document.getElementById('inAmount').value = ''; 
-          document.getElementById('inDescription').value = ''; 
-          document.getElementById('outAmount').value = ''; 
-          document.getElementById('outDescription').value = ''; 
-          
-          const inSaveBtn = document.getElementById('inSaveBtn');
-          if (inSaveBtn) inSaveBtn.innerText = 'Save';
-          const outSaveBtn = document.getElementById('outSaveBtn');
-          if (outSaveBtn) outSaveBtn.innerText = 'Save';
-          
-          setAutoTime(TypeCapital);
-
-          // ডিফল্ট সিলেক্ট সেট করা 
-          const inCategorySelect = document.getElementById('incategory');
-          if (inCategorySelect) { inCategorySelect.selectedIndex = inCategorySelect.options.length > 1 ? 1 : 0; }
-          const inPersonSelect = document.getElementById('inperson');
-          if (inPersonSelect) { inPersonSelect.value = 'জমা💰করা'; }
-          
-          const outCategorySelect = document.getElementById('outcategory');
-          if (outCategorySelect) { outCategorySelect.selectedIndex = outCategorySelect.options.length > 1 ? 1 : 0; }
-          const outPersonSelect = document.getElementById('outperson');
-          if (outPersonSelect) { outPersonSelect.value = cashOutPerson; } 
-          
-          // স্যালারি ড্রপডাউন লুকানো
-          if (type === 'out') toggleSalaryEmployeeSelect();
-      }
-  }
-
-  
-  
-
-  function closeForm() {
-      document.getElementById("formContainer").style.display = "none";
-      document.getElementById("formIn").style.display = "none";
-      document.getElementById("formOut").style.display = "none";
-      
-      // এডিট মোড রিসেট করা
-      isEditingIndex = null;
-      
-      const inSaveBtn = document.getElementById('inSaveBtn');
-      if (inSaveBtn) inSaveBtn.innerText = 'Save';
-      const outSaveBtn = document.getElementById('outSaveBtn');
-      if (outSaveBtn) outSaveBtn.innerText = 'Save';
-      
-      // স্যালারি ড্রপডাউন লুকিয়ে রাখা
-      const employeeSelectContainer = document.getElementById('salaryEmployeeSelectContainer');
-      if (employeeSelectContainer) employeeSelectContainer.style.display = 'none';
-      
-      // HTML ভিত্তিক রিসেট 
-      const inCategorySelect = document.getElementById('incategory');
-      if (inCategorySelect) { inCategorySelect.selectedIndex = inCategorySelect.options.length > 1 ? 1 : 0; }
-      const inPersonSelect = document.getElementById('inperson');
-      if (inPersonSelect) { inPersonSelect.selectedIndex = inPersonSelect.options.length > 1 ? 1 : 0; }
-      const outCategorySelect = document.getElementById('outcategory');
-      if (outCategorySelect) { outCategorySelect.selectedIndex = outCategorySelect.options.length > 1 ? 1 : 0; }
-      const outPersonSelect = document.getElementById('outperson');
-      if (outPersonSelect) { outPersonSelect.value = cashOutPerson; } 
-  }  
-  
-
-  function setAutoTime(type) {
-      const now = new Date();
-      let hour = now.getHours();
-      let minute = now.getMinutes();
-      const today = now.toISOString().substring(0, 10);
-
-      minute = minute < 10 ? "0" + minute : minute;
-      let ampm = hour >= 12 ? "PM" : "AM";
-      let showHour = hour % 12 || 12;
-
-      document.getElementById(`showTime${type}`).innerText = `${showHour}:${minute} ${ampm}`;
-      document.getElementById(`showDate${type}`).innerText = today;
-
-      document.getElementById(`timePicker${type}`).value = 
-          now.toISOString().substring(11, 16);
-      document.getElementById(`datePicker${type}`).value = today;
-  }
-  function openTime(type) {
-      const timeInput = document.getElementById(`timePicker${type}`);
-      if (timeInput && timeInput.showPicker) timeInput.showPicker();
-      else if (timeInput) timeInput.click();
-  }
-  function openDate(type) {
-      const dateInput = document.getElementById(`datePicker${type}`);
-      if (dateInput && dateInput.showPicker) dateInput.showPicker();          
-      else if (dateInput) dateInput.click();          
-  }
-
-  // টাইম/ডেট ইনপুট পরিবর্তনের জন্য ইভেন্ট লিসেনার
-  const timePickerIn = document.getElementById("timePickerIn");
-  if(timePickerIn) timePickerIn.addEventListener("change", function () {
-      let [hour, minute] = this.value.split(":");
-      hour = parseInt(hour);
-      let ampm = hour >= 12 ? "PM" : "AM";
-      let showHour = hour % 12 || 12;
-      document.getElementById("showTimeIn").innerText = `${showHour}:${minute} ${ampm}`;
-  });
-  
-  const timePickerOut = document.getElementById("timePickerOut");
-  if(timePickerOut) timePickerOut.addEventListener("change", function () {
-      let [hour, minute] = this.value.split(":");
-      hour = parseInt(hour);
-      let ampm = hour >= 12 ? "PM" : "AM";
-      let showHour = hour % 12 || 12;
-      document.getElementById("showTimeOut").innerText = `${showHour}:${minute} ${ampm}`;
-  });
-
-  const datePickerIn = document.getElementById("datePickerIn");
-  if(datePickerIn) datePickerIn.addEventListener("change", function () {
-      document.getElementById("showDateIn").innerText = this.value;
-  });
-  
-  const datePickerOut = document.getElementById("datePickerOut");
-  if(datePickerOut) datePickerOut.addEventListener("change", function () {
-      document.getElementById("showDateOut").innerText = this.value;
-  });
+});
 
 
-  // =======================================================
-  // === ব্যালেন্স ও কার্ড আপডেট ফাংশন ===
-  // =======================================================
+function openForm(type) {
+    const formContainer = document.getElementById("formContainer");
+    if (!formContainer) {
+        console.error("HTML Error: formContainer ID not found.");
+        return;
+    }
+    formContainer.style.display = "flex";
+    
+    const TypeCapital = type === 'in' ? 'In' : 'Out';
+
+    if (type === "in") {
+        document.getElementById("formIn").style.display = "block";
+        document.getElementById("formOut").style.display = "none";
+    } else {
+        document.getElementById("formIn").style.display = "none";
+        document.getElementById("formOut").style.display = "block";
+    }
+    
+    // নতুন এন্ট্রি হলে রিসেট নিশ্চিত করা
+    if (isEditingIndex === null) {
+        document.getElementById('inAmount').value = ''; 
+        document.getElementById('inDescription').value = ''; 
+        document.getElementById('outAmount').value = ''; 
+        document.getElementById('outDescription').value = ''; 
+        
+        const inSaveBtn = document.getElementById('inSaveBtn');
+        if (inSaveBtn) inSaveBtn.innerText = 'Save';
+        const outSaveBtn = document.getElementById('outSaveBtn');
+        if (outSaveBtn) outSaveBtn.innerText = 'Save';
+        
+        setAutoTime(TypeCapital);
+
+        const inCategorySelect = document.getElementById('incategory');
+        if (inCategorySelect) { inCategorySelect.selectedIndex = inCategorySelect.options.length > 1 ? 1 : 0; }
+        const inPersonSelect = document.getElementById('inperson');
+        if (inPersonSelect) { inPersonSelect.value = 'জমা💰করা'; }
+        
+        const outCategorySelect = document.getElementById('outcategory');
+        if (outCategorySelect) { outCategorySelect.selectedIndex = outCategorySelect.options.length > 1 ? 1 : 0; }
+        const outPersonSelect = document.getElementById('outperson');
+        if (outPersonSelect) { outPersonSelect.value = cashOutPerson; } 
+        
+        if (type === 'out') toggleSalaryEmployeeSelect();
+    }
+}
+
+
+function closeForm() {
+    document.getElementById("formContainer").style.display = "none";
+    document.getElementById("formIn").style.display = "none";
+    document.getElementById("formOut").style.display = "none";
+    
+    isEditingIndex = null;
+    
+    const inSaveBtn = document.getElementById('inSaveBtn');
+    if (inSaveBtn) inSaveBtn.innerText = 'Save';
+    const outSaveBtn = document.getElementById('outSaveBtn');
+    if (outSaveBtn) outSaveBtn.innerText = 'Save';
+    
+    const employeeSelectContainer = document.getElementById('salaryEmployeeSelectContainer');
+    if (employeeSelectContainer) employeeSelectContainer.style.display = 'none';
+    
+    const inCategorySelect = document.getElementById('incategory');
+    if (inCategorySelect) { inCategorySelect.selectedIndex = inCategorySelect.options.length > 1 ? 1 : 0; }
+    const inPersonSelect = document.getElementById('inperson');
+    if (inPersonSelect) { inPersonSelect.selectedIndex = inPersonSelect.options.length > 1 ? 1 : 0; }
+    const outCategorySelect = document.getElementById('outcategory');
+    if (outCategorySelect) { outCategorySelect.selectedIndex = outCategorySelect.options.length > 1 ? 1 : 0; }
+    const outPersonSelect = document.getElementById('outperson');
+    if (outPersonSelect) { outPersonSelect.value = cashOutPerson; } 
+}  
+
+
+function setAutoTime(type) {
+    const now = new Date();
+    let hour = now.getHours();
+    let minute = now.getMinutes();
+    const today = now.toISOString().substring(0, 10);
+
+    minute = minute < 10 ? "0" + minute : minute;
+    let ampm = hour >= 12 ? "PM" : "AM";
+    let showHour = hour % 12 || 12;
+
+    document.getElementById(`showTime${type}`).innerText = `${showHour}:${minute} ${ampm}`;
+    document.getElementById(`showDate${type}`).innerText = today;
+
+    document.getElementById(`timePicker${type}`).value = 
+        now.toISOString().substring(11, 16);
+    document.getElementById(`datePicker${type}`).value = today;
+}
+function openTime(type) {
+    const timeInput = document.getElementById(`timePicker${type}`);
+    if (timeInput && timeInput.showPicker) timeInput.showPicker();
+    else if (timeInput) timeInput.click();
+}
+function openDate(type) {
+    const dateInput = document.getElementById(`datePicker${type}`);
+    if (dateInput && dateInput.showPicker) dateInput.showPicker();          
+    else if (dateInput) dateInput.click();          
+}
+
+const timePickerIn = document.getElementById("timePickerIn");
+if(timePickerIn) timePickerIn.addEventListener("change", function () {
+    let [hour, minute] = this.value.split(":");
+    hour = parseInt(hour);
+    let ampm = hour >= 12 ? "PM" : "AM";
+    let showHour = hour % 12 || 12;
+    document.getElementById("showTimeIn").innerText = `${showHour}:${minute} ${ampm}`;
+});
+
+const timePickerOut = document.getElementById("timePickerOut");
+if(timePickerOut) timePickerOut.addEventListener("change", function () {
+    let [hour, minute] = this.value.split(":");
+    hour = parseInt(hour);
+    let ampm = hour >= 12 ? "PM" : "AM";
+    let showHour = hour % 12 || 12;
+    document.getElementById("showTimeOut").innerText = `${showHour}:${minute} ${ampm}`;
+});
+
+const datePickerIn = document.getElementById("datePickerIn");
+if(datePickerIn) datePickerIn.addEventListener("change", function () {
+    document.getElementById("showDateIn").innerText = this.value;
+});
+
+const datePickerOut = document.getElementById("datePickerOut");
+if(datePickerOut) datePickerOut.addEventListener("change", function () {
+    document.getElementById("showDateOut").innerText = this.value;
+});
+
+
+// =======================================================
+// === ৫. ব্যালেন্স ও কার্ড আপডেট ফাংশন (পরিবর্তন হয়নি) ===
+// =======================================================
 function calculateAndDisplayBalance() {
     let totalOut = 0;   
     let totalInToday = 0;
@@ -1317,12 +1332,10 @@ function calculateAndDisplayBalance() {
     let totalKingBank = 0;  
     let totalLoan = 0;
     
-    // ক্যাটাগরি কনস্ট্যান্ট
     const loanTakenCategory = 'ঋন নেওয়া🩸';
     const loanGivenCategory = 'ঋন দেওয়া♻️';
 
     transactions.forEach(t => {
-        // ১. ক্যাশ ইন (In)
         if (t.type === 'in') {
             if (t.person === kingBankCategory) { 
                 totalKingBank += t.amount; 
@@ -1330,8 +1343,6 @@ function calculateAndDisplayBalance() {
                 totalInCash += t.amount;   
             }
         } 
-        
-        // ২. ক্যাশ আউট (Out)
         else if (t.type === 'out') {
             totalOut += t.amount;
             
@@ -1340,7 +1351,6 @@ function calculateAndDisplayBalance() {
             }
         }   
         
-        // ৩. ঋণ (Loan) গণনা
         if (t.type === 'in' && t.category === loanTakenCategory) {
             totalLoan += t.amount;  
         }
@@ -1348,7 +1358,6 @@ function calculateAndDisplayBalance() {
             totalLoan -= t.amount; 
         }
 
-        // ৪. আজকের জমা/খরচ গণনা
         if (t.date === today) {
             if (t.type === 'in' && t.person !== kingBankCategory) { 
                 totalInToday += t.amount;
@@ -1359,7 +1368,6 @@ function calculateAndDisplayBalance() {
         }
     });
     
-    // হাতে থাকা নেট ব্যালেন্স গণনা
     let totalCashOutFromCash = transactions
         .filter(t => t.type === 'out' && t.person === cashOutPerson)
         .reduce((sum, t) => sum + t.amount, 0);
@@ -1367,7 +1375,6 @@ function calculateAndDisplayBalance() {
     let netBalance = totalInCash - totalCashOutFromCash; 
     const totalDeposit = totalInCash + totalKingBank; 
 
-    // কার্ডগুলি আপডেট করা
     const card1 = document.querySelector('.card1 p');
     if(card1) card1.innerText = `৳ ${netBalance.toFixed(0)}`;     
     const card2 = document.querySelector('.card2 p');
@@ -1383,23 +1390,19 @@ function calculateAndDisplayBalance() {
 }
 
 
-  // =======================================================
-  // === স্যালারি ড্রপডাউন লজিক (নতুন) ===
-  // =======================================================
+// =======================================================
+// === ৬. স্যালারি ড্রপডাউন লজিক (পরিবর্তন হয়নি) ===
+// =======================================================
 
 function populateSalaryEmployeeSelect() {
     const select = document.getElementById('salaryEmployeeSelect');
     if (!select) return;
 
-    // পুরানো অপশন মুছে ফেলা
     select.innerHTML = '<option value="" disabled selected>কার বেতন?</option>';
 
-    // নতুন অপশন যোগ করা
     EMPLOYEES_LIST.forEach(employee => {
         const option = document.createElement('option');
-        // value হিসেবে Employee ID ব্যবহার করা হয়েছে
         option.value = employee.id; 
-        // টাকা সংখ্যায় কমা যোগ করা হয়েছে
         option.textContent = `${employee.name} (৳${employee.salary.toLocaleString('bn-BD')})`; 
         select.appendChild(option);
     });
@@ -1414,7 +1417,6 @@ function toggleSalaryEmployeeSelect() {
 
     if (outCategorySelect.value === '💵Salary💶') {
         employeeSelectContainer.style.display = 'block';
-        // HTML5-এর 'required' এট্রিবিউট সেট করা
         employeeSelect.setAttribute('required', 'required'); 
     } else {
         employeeSelectContainer.style.display = 'none';
@@ -1422,49 +1424,40 @@ function toggleSalaryEmployeeSelect() {
     }
 }
 
-  // =======================================================
-  // === ট্রানজেকশন ফিল্টারিং, সর্টিং, সেভ, এডিট, ডিলিট ফাংশন ===
-  // =======================================================
+
+// =======================================================
+// === ৭. ট্রানজেকশন ফিল্টারিং, সর্টিং, সেভ, এডিট, ডিলিট ফাংশন (সেভ/ডিলিট আপডেট করা হয়েছে) ===
+// =======================================================
   
-// একটি ট্রানজেকশনের তারিখ এবং সময়কে একটি তুলনীয় টাইমস্ট্যাম্পে রূপান্তর করে
 function getTransactionSortKey(t) {
     if (!t.date || !t.time) {
-        // যদি তারিখ বা সময় না থাকে, তবে সংরক্ষণের সময়টি ব্যবহার করা হবে
         return t.timestamp || 0; 
     }
 
     let time24hr;
     let [timeStr, ampm] = t.time.split(' '); 
     
-    // AM/PM থেকে 24-ঘন্টা ফরম্যাটে রূপান্তর
     if (ampm) { 
         let [hour, minute] = timeStr.split(':');
         hour = parseInt(hour);
         minute = parseInt(minute);
         if (ampm === 'PM' && hour !== 12) hour += 12;
-        if (ampm === 'AM' && hour === 12) hour = 0; // মধ্যরাত 12 AM
+        if (ampm === 'AM' && hour === 12) hour = 0; 
         
         time24hr = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
     } else {
-        // যদি সময়টি AM/PM ছাড়া থাকে (সুরক্ষার জন্য)
         time24hr = t.time.substring(0, 5);
     }
 
-    // একটি সম্পূর্ণ ডেট-টাইম স্ট্রিং তৈরি করা: YYYY-MM-DDTTHH:MM:SS
     const dateTimeStr = `${t.date}T${time24hr}:00`;
-    
-    // স্ট্রিং থেকে টাইমস্ট্যাম্প তৈরি করা
     const timestamp = new Date(dateTimeStr).getTime();
     
-    // যদি রূপান্তর ব্যর্থ হয়, তবে সংরক্ষণের সময়টি ফিরিয়ে দেওয়া হবে
     return isNaN(timestamp) ? t.timestamp || 0 : timestamp;
 }
 
 function getFilteredTransactions() {
-    // ১. ফিল্টার ভ্যালু নেওয়া
     const selectedCategory = document.getElementById('categoryFilter') ? document.getElementById('categoryFilter').value : 'all';
     
-    // ২. ডেট ফিল্টার ভ্যালু নেওয়া (dateFilterBtn dataset থেকে)
     const dateFilterBtn = document.getElementById('dateFilterBtn');
     const startDateVal = dateFilterBtn ? dateFilterBtn.dataset.startDate || '' : '';
     const endDateVal = dateFilterBtn ? dateFilterBtn.dataset.endDate || '' : '';
@@ -1474,11 +1467,9 @@ function getFilteredTransactions() {
 
     let allTransactions = [...transactions];
     
-    // ৩. ফিল্টারিং লজিক
     let filteredTransactions = allTransactions.filter(t => {
         let categoryMatch = false; 
         
-        // **টাইপ ফিল্টারিং এবং ক্যাটাগরি লজিক:**
         if (selectedCategory === 'IN_ONLY') {
             categoryMatch = t.type === 'in'; 
         } else if (selectedCategory === 'OUT_ONLY') {
@@ -1489,24 +1480,21 @@ function getFilteredTransactions() {
             categoryMatch = t.category === selectedCategory;
         }
 
-        // ডেট ফিল্টারিং লজিক
         const transactionDate = t.date ? new Date(t.date + 'T00:00:00').getTime() : 0;
         const dateMatch = transactionDate >= startDate && transactionDate <= endDate;
 
         return categoryMatch && dateMatch; 
     });
 
-    // ৪. সর্টিং লজিক: তারিখ এবং সময়ের ভিত্তিতে নতুন ট্রানজেকশন উপরে দেখানোর জন্য
     filteredTransactions.sort((a, b) => {
         const timestampA = getTransactionSortKey(a);
         const timestampB = getTransactionSortKey(b);
         
-        // তারিখ/সময়ের ভিত্তিতে সর্ট (নতুন (বেশি) টাইমস্ট্যাম্প আগে)
         if (timestampB !== timestampA) {
             return timestampB - timestampA;
         }
         
-        // যদি তারিখ/সময় একই হয়, তবে যে ট্রানজেকশনটি পরে তৈরি হয়েছে (b.timestamp) সেটি আগে দেখাবে (সেকেন্ডারি সর্ট)
+        // যদি ডেট/টাইম একই হয়, তবে Firebase timestamp ব্যবহার করা
         return b.timestamp - a.timestamp; 
     });
     
@@ -1546,7 +1534,12 @@ function updateResultAmount() {
 }
 
 
-  function saveTransaction(type) {
+function saveTransaction(type) {
+    if (typeof firebase === 'undefined') {
+        alert("Firebase লোড হয়নি।");
+        return;
+    }
+    
     const isEditing = isEditingIndex !== null;
     
     const amountInput = document.getElementById(`${type === 'in' ? 'inAmount' : 'outAmount'}`);
@@ -1562,16 +1555,14 @@ function updateResultAmount() {
     let descriptionValue = descriptionInput.value || (type === 'in' ? 'জমা' : 'খরচ');
 
     if (isNaN(amount) || amount <= 0) {
-      alert("সঠিক পরিমাণ লিখুন।");
-      return;
+        alert("সঠিক পরিমাণ লিখুন।");
+        return;
     }
     
-    // স্যালারি লজিক যোগ করা
     if (type === 'out' && categoryValue === '💵Salary💶') {
         const salaryEmployeeSelect = document.getElementById('salaryEmployeeSelect');
         if (salaryEmployeeSelect && salaryEmployeeSelect.value) {
             const selectedEmployeeOption = salaryEmployeeSelect.options[salaryEmployeeSelect.selectedIndex].textContent;
-            // Employee Name ও Salary Description-এ যুক্ত করা 
             descriptionValue = `বেতন: ${selectedEmployeeOption} - ${descriptionValue}`; 
         } else {
              alert("বেতন দেওয়ার জন্য কর্মচারীকে নির্বাচন করুন।");
@@ -1579,6 +1570,19 @@ function updateResultAmount() {
         }
     }
 
+    let transactionId;
+    let timestampValue;
+
+    if (isEditing) {
+        // এডিট মোডে থাকলে, বিদ্যমান আইডি এবং টাইমস্ট্যাম্প ব্যবহার করা
+        transactionId = transactions[isEditingIndex].id; 
+        timestampValue = transactions[isEditingIndex].timestamp;
+    } else {
+        // নতুন ট্রানজেকশন হলে, Firebase-এর push() দিয়ে একটি নতুন ইউনিক ID তৈরি করা
+        transactionId = transactionsRef.push().key; 
+        // ServerValue.TIMESTAMP ক্লাউড সার্ভারের সঠিক টাইমস্ট্যাম্প দেবে
+        timestampValue = window.firebaseServerTimestamp; 
+    }
 
     const newTransaction = {
         type: type,
@@ -1588,36 +1592,43 @@ function updateResultAmount() {
         category: categoryValue, 
         person: personValue, 
         date: selectedDate, 
-        timestamp: isEditing ? transactions[isEditingIndex].timestamp : new Date().getTime()
+        timestamp: timestampValue // Firebase Server Timestamp
     };
     
-    if (isEditing) {
-        transactions[isEditingIndex] = newTransaction;
-    } else {
-        transactions.push(newTransaction);
-    }
+    // Firebase-এ ডেটা সেভ বা আপডেট করা
+    database.ref('transactions/' + transactionId).set(newTransaction)
+    .then(() => {
+        closeForm();
+    })
+    .catch((error) => {
+        alert("ডেটা সেভ করতে সমস্যা হয়েছে: " + error.message);
+        console.error("Firebase Save Error:", error);
+    });
     
-    localStorage.setItem('transactions', JSON.stringify(transactions));
-
-    calculateAndDisplayBalance();
-    displayTransactions();
-    setupPagination();
-    closeForm();
-  }
+}
   
-  function saveIn() {
+function saveIn() {
     saveTransaction('in');
-  }
-  function saveOut() {
+}
+function saveOut() {
     saveTransaction('out');
-  }
+}
 
 
-  function editTransaction(index) {
-    const t = transactions[index];
-    if (!t) { console.error("Invalid transaction index:", index); return; }
-    isEditingIndex = index; 
+function editTransaction(index) {
+    // index টি হল filteredTransactions অ্যারের index
+    const tFiltered = getFilteredTransactions()[index];
+    if (!tFiltered) { console.error("Invalid filtered transaction index:", index); return; }
     
+    // আসল transactions অ্যারেতে তার index খুঁজে বের করা
+    const originalIndex = transactions.findIndex(tx => tx.id === tFiltered.id);
+    const t = transactions[originalIndex];
+
+    if (!t) { console.error("Transaction not found in main array:", originalIndex); return; }
+
+    isEditingIndex = originalIndex; 
+    
+    // ... (ফর্ম খোলার অন্যান্য লজিক অপরিবর্তিত) ...
     const type = t.type;
     document.getElementById("formContainer").style.display = "flex";
     
@@ -1636,7 +1647,6 @@ function updateResultAmount() {
     const categorySelect = document.getElementById(`${type}category`);
     if (categorySelect) {
         categorySelect.value = t.category;
-        // Edit করার সময় Salary সিলেক্ট থাকলে ড্রপডাউন দেখাবে 
         if (type === 'out' && t.category === '💵Salary💶') {
             const employeeSelectContainer = document.getElementById('salaryEmployeeSelectContainer');
             if (employeeSelectContainer) employeeSelectContainer.style.display = 'block';
@@ -1671,28 +1681,41 @@ function updateResultAmount() {
     
     const saveBtn = document.getElementById(`${t.type}SaveBtn`);
     if (saveBtn) saveBtn.innerText = 'Update';
-  }
-
-
-  function deleteTransaction(index) {
-    if (!confirm("আপনি কি নিশ্চিত যে আপনি এই লেনদেনটি মুছে ফেলতে চান?")) { return; }
-    transactions.splice(index, 1); 
-    localStorage.setItem('transactions', JSON.stringify(transactions));
-    
-    const totalTransactionsAfterDelete = getFilteredTransactions().length;
-    currentPage = Math.min(currentPage, Math.max(1, Math.ceil(totalTransactionsAfterDelete / rowsPerPage)));
-
-    calculateAndDisplayBalance();
-    displayTransactions(); 
-    setupPagination(); 
-    updateResultAmount();
 }
 
 
-  // =======================================================
-  // === ট্রানজেকশন তালিকা UI-তে দেখানোর ফাংশন ===
-  // =======================================================
-  function displayTransactions() {
+function deleteTransaction(index) {
+    if (typeof firebase === 'undefined') {
+        alert("Firebase লোড হয়নি।");
+        return;
+    }
+    if (!confirm("আপনি কি নিশ্চিত যে আপনি এই লেনদেনটি মুছে ফেলতে চান?")) { return; }
+    
+    // index টি হল filteredTransactions অ্যারের index
+    const transactionToDelete = getFilteredTransactions()[index];
+
+    if (!transactionToDelete || !transactionToDelete.id) {
+        console.error("ডিলিট করার জন্য ট্রানজেকশন আইডি পাওয়া যায়নি।");
+        return;
+    }
+    
+    // Firebase থেকে ডিলিট করা
+    database.ref('transactions/' + transactionToDelete.id).remove()
+    .then(() => {
+        // রিয়েলটাইম লিসেনার স্বয়ংক্রিয়ভাবে UI আপডেট করবে।
+        console.log("Transaction successfully deleted from Firebase.");
+    })
+    .catch((error) => {
+        alert("ডেটা ডিলিট করতে সমস্যা হয়েছে: " + error.message);
+        console.error("Firebase Delete Error:", error);
+    });
+}
+
+
+// =======================================================
+// === ৮. ট্রানজেকশন তালিকা UI-তে দেখানোর ফাংশন (আপডেট করা হয়েছে) ===
+// =======================================================
+function displayTransactions() {
     const tableBody = document.getElementById('transactionBody');
     const paginationControls = document.querySelector('.pagination-controls'); 
     let listHTML = ``;
@@ -1717,22 +1740,23 @@ function updateResultAmount() {
         return; 
     }
 
-    paginatedItems.forEach((t) => {
+    paginatedItems.forEach((t, index) => {
         const amountClass = t.type === 'in' ? 'amount-in' : 'amount-out';
         const sign = t.type === 'in' ? '+' : '-';
    
         let customStyle = '';
         if (t.type === 'in' && t.category === loanTakenCategory) {
-            customStyle = 'style="color: #5d30d9;"'; // ঋন নেওয়া
+            customStyle = 'style="color: #5d30d9;"'; 
         }
         if (t.type === 'out' && t.category === loanGivenCategory) {
-            customStyle = 'style="color: #dd3be3;"'; // ঋন দেওয়া
+            customStyle = 'style="color: #dd3be3;"'; 
         }
        else if (t.type === 'in' && t.person === kingBankCategory) { 
-             customStyle = 'style="color: #007bff; font-weight: bold;"'; // ব্যাংক ডিপোজিট
+             customStyle = 'style="color: #007bff; font-weight: bold;"'; 
         }
         
-        const originalIndex = transactions.findIndex(tx => tx.timestamp === t.timestamp && tx.amount === t.amount);
+        // originalIndex দরকার নেই, কারণ edit/delete filtered array-এর index ব্যবহার করবে
+        const displayIndex = start + index; // paginated array এর index
 
         listHTML += `
             <div class="transaction-item">
@@ -1745,8 +1769,8 @@ function updateResultAmount() {
                     ${sign} ৳ ${t.amount.toFixed(0)}
                 </div>
                 <div class="action-buttons">
-                    <button onclick="editTransaction(${originalIndex})" class="edit-btn">Edit</button>
-                    <button onclick="deleteTransaction(${originalIndex})" class="delete-btn">Delete</button>
+                    <button onclick="editTransaction(${displayIndex})" class="edit-btn">Edit</button>
+                    <button onclick="deleteTransaction(${displayIndex})" class="delete-btn">Delete</button>
                 </div> 
             </div>
         `;
@@ -1757,257 +1781,226 @@ function updateResultAmount() {
     if(paginationControls) {
         setupPagination(); 
     }
-  }
+}
 
 
-  // =======================================================
-  // === পেজিনেশন ফাংশন (FINAL FIXED FOR 10+ PAGES) ===
-  // =======================================================
-  function setupPagination() {
-      const filteredTransactions = getFilteredTransactions(); // assumes this function exists and works
-      const totalPages = Math.ceil(filteredTransactions.length / rowsPerPage); // assumes rowsPerPage exists
-      const paginationContainer = document.querySelector('.pagination-controls');
-      
-      if (!paginationContainer) return; 
+// =======================================================
+// === ৯. পেজিনেশন ফাংশন (পরিবর্তন হয়নি) ===
+// =======================================================
+function setupPagination() {
+    const filteredTransactions = getFilteredTransactions();
+    const totalPages = Math.ceil(filteredTransactions.length / rowsPerPage);
+    const paginationContainer = document.querySelector('.pagination-controls');
+    
+    if (!paginationContainer) return; 
 
-      paginationContainer.innerHTML = ''; 
+    paginationContainer.innerHTML = ''; 
 
-      if (totalPages === 0) return; 
+    if (totalPages === 0) return; 
 
-      const maxPagesToShow = 5; 
-      let startPage, endPage;
+    const maxPagesToShow = 5; 
+    let startPage, endPage;
 
-      // রেঞ্জ ক্যালকুলেশন
-      if (totalPages <= maxPagesToShow) {
-          startPage = 1;
-          endPage = totalPages;
-      } else {
-          const middle = Math.ceil(maxPagesToShow / 2);
-          
-          if (currentPage <= middle) {
-              startPage = 1;
-              endPage = maxPagesToShow;
-          } else if (currentPage + middle > totalPages) {
-              startPage = totalPages - maxPagesToShow + 1;
-              endPage = totalPages;
-          } else {
-              startPage = currentPage - middle + 1;
-              endPage = currentPage + middle - 1;
-          }
-      }
+    if (totalPages <= maxPagesToShow) {
+        startPage = 1;
+        endPage = totalPages;
+    } else {
+        const middle = Math.ceil(maxPagesToShow / 2);
+        
+        if (currentPage <= middle) {
+            startPage = 1;
+            endPage = maxPagesToShow;
+        } else if (currentPage + middle > totalPages) {
+            startPage = totalPages - maxPagesToShow + 1;
+            endPage = totalPages;
+        } else {
+            startPage = currentPage - middle + 1;
+            endPage = currentPage + middle - 1;
+        }
+    }
 
-      // 1. '<<' বাটন
-      const prevButton = createPaginationButton('<<', currentPage - 1);
-      if (currentPage === 1) {
-          prevButton.classList.add('disabled-nav'); 
-      }
-      paginationContainer.appendChild(prevButton);
+    const prevButton = createPaginationButton('<<', currentPage - 1);
+    if (currentPage === 1) {
+        prevButton.classList.add('disabled-nav'); 
+    }
+    paginationContainer.appendChild(prevButton);
 
-      // 2. Page 1 (সর্বদা দৃশ্যমান)
-      const pageOneButton = createPaginationButton(1, 1);
-      if (currentPage === 1) pageOneButton.classList.add('active-page');
-      paginationContainer.appendChild(pageOneButton);
+    const pageOneButton = createPaginationButton(1, 1);
+    if (currentPage === 1) pageOneButton.classList.add('active-page');
+    paginationContainer.appendChild(pageOneButton);
 
-      // 3. প্রথম ellipsis (...)
-      if (startPage > 2) {
-          paginationContainer.appendChild(createEllipsis());
-      }
+    if (startPage > 2) {
+        paginationContainer.appendChild(createEllipsis());
+    }
 
-      // 4. পেজ নম্বর বাটন (লুপ)
-      // Loop শুরু হবে 2 থেকে
-      let loopStart = Math.max(2, startPage);
-      let loopEnd = endPage;
-      
-      // ✅ FIX 1: লুপের রেঞ্জ শেষ পেজ (totalPages) এর আগ পর্যন্ত সেট করা হলো
-      if (totalPages > 1) {
-          // loopEnd কে totalPages - 1 পর্যন্ত সীমাবদ্ধ করা হলো
-          loopEnd = Math.min(endPage, totalPages - 1); 
-      }
-      
-      for (let i = loopStart; i <= loopEnd; i++) {
-          
-          const button = createPaginationButton(i, i);
-          if (i === currentPage) {
-             button.classList.add('active-page'); 
-          }
-          paginationContainer.appendChild(button);
-      }
+    let loopStart = Math.max(2, startPage);
+    let loopEnd = endPage;
+    
+    if (totalPages > 1) {
+        loopEnd = Math.min(endPage, totalPages - 1); 
+    }
+    
+    for (let i = loopStart; i <= loopEnd; i++) {
+        
+        const button = createPaginationButton(i, i);
+        if (i === currentPage) {
+           button.classList.add('active-page'); 
+        }
+        paginationContainer.appendChild(button);
+    }
 
-      // 5. শেষ ellipsis (...)
-      // ellipsis দেখাবে যদি লুপের শেষ পেজ (loopEnd) শেষ পেজটির (totalPages) থেকে অন্তত দুই ঘর কম হয়
-      if (loopEnd < totalPages - 1) { 
-          paginationContainer.appendChild(createEllipsis());
-      }
-      
-      // 6. শেষ পেজ বাটন (যদি এটি 1 নম্বর পেজ না হয় এবং লুপে যোগ না হয়ে থাকে)
-      // ✅ FIX 2: সরল লজিক: যদি loopEnd শেষ পেজের চেয়ে কম হয় (অর্থাৎ শেষ পেজটি যোগ হয়নি), তাহলে যোগ করো।
-      if (totalPages > 1 && totalPages > loopEnd) {
-          const lastPageButton = createPaginationButton(totalPages, totalPages);
-          if (currentPage === totalPages) {
-              lastPageButton.classList.add('active-page');
-          }
-          paginationContainer.appendChild(lastPageButton);
-      }
+    if (loopEnd < totalPages - 1) { 
+        paginationContainer.appendChild(createEllipsis());
+    }
+    
+    if (totalPages > 1 && totalPages > loopEnd) {
+        const lastPageButton = createPaginationButton(totalPages, totalPages);
+        if (currentPage === totalPages) {
+            lastPageButton.classList.add('active-page');
+        }
+        paginationContainer.appendChild(lastPageButton);
+    }
 
-      // 7. '>>' বাটন
-      const nextButton = createPaginationButton('>>', currentPage + 1);
-      if (currentPage === totalPages) {
-          nextButton.classList.add('disabled-nav'); 
-      }
-      paginationContainer.appendChild(nextButton);
-      
-  }
+    const nextButton = createPaginationButton('>>', currentPage + 1);
+    if (currentPage === totalPages) {
+        nextButton.classList.add('disabled-nav'); 
+    }
+    paginationContainer.appendChild(nextButton);
+}
 
 
-  function createPaginationButton(text, page) {
-      const link = document.createElement('a'); 
-      link.innerText = text;
-      link.href = '#';
-      link.classList.add('page-link'); 
-      link.setAttribute('data-page', page);
-      
-      link.addEventListener('click', (e) => {
-          if (link.classList.contains('disabled-nav')) {
-              e.preventDefault();
-              return;
-          }
-          e.preventDefault(); 
-          changePage(page);
-      });
-      
-      if (isNaN(parseInt(text))) {
-          link.classList.add('nav-button');
-      }
-      return link;
-  }
+function createPaginationButton(text, page) {
+    const link = document.createElement('a'); 
+    link.innerText = text;
+    link.href = '#';
+    link.classList.add('page-link'); 
+    link.setAttribute('data-page', page);
+    
+    link.addEventListener('click', (e) => {
+        if (link.classList.contains('disabled-nav')) {
+            e.preventDefault();
+            return;
+        }
+        e.preventDefault(); 
+        changePage(page);
+    });
+    
+    if (isNaN(parseInt(text))) {
+        link.classList.add('nav-button');
+    }
+    return link;
+}
 
-  function createEllipsis() {
-      const span = document.createElement('span');
-      span.innerText = '...';
-      span.classList.add('ellipsis');
-      return span;
-  }
-  
-  function changePage(page) {
-      const totalItems = getFilteredTransactions().length; 
-      const newTotalPages = Math.ceil(totalItems / rowsPerPage);
-      
-      if (page >= 1 && page <= newTotalPages) {
-          currentPage = page; 
-          
-          displayTransactions();
-          setupPagination();
-      }
-  }
+function createEllipsis() {
+    const span = document.createElement('span');
+    span.innerText = '...';
+    span.classList.add('ellipsis');
+    return span;
+}
 
-
-  function changeRowsPerPage(newRowsPerPage) {
-      rowsPerPage = parseInt(newRowsPerPage); 
-      currentPage = 1; 
-      
-      displayTransactions();
-      setupPagination();
-  }
-  
-  function filterByCategory() {
-   
-      currentPage = 1;
-      displayTransactions(); 
-      setupPagination();
-      updateResultAmount(); 
-      
-      // আউট ক্যাটাগরি চেঞ্জ হলে স্যালারি ড্রপডাউন টগল করা 
-      const outCategorySelect = document.getElementById('outcategory');
-      if (outCategorySelect && outCategorySelect.value === '💵Salary💶') {
-          // এটি ফিল্টার ক্যাটাগরির জন্য, তাই এখানে toggleSalaryEmployeeSelect() ব্যবহার করা যাবে না। 
-          // এর জন্য আলাদা ফাংশন দরকার হবে।
-      }
-  }
-  
-  // নতুন ইভেন্ট লিসেনার যোগ করা
-  const outCategorySelect = document.getElementById('outcategory');
-  if (outCategorySelect) {
-      outCategorySelect.addEventListener('change', toggleSalaryEmployeeSelect);
-  }
+function changePage(page) {
+    const totalItems = getFilteredTransactions().length; 
+    const newTotalPages = Math.ceil(totalItems / rowsPerPage);
+    
+    if (page >= 1 && page <= newTotalPages) {
+        currentPage = page; 
+        
+        displayTransactions();
+        setupPagination();
+    }
+}
 
 
-  // =======================================================
-  // === কলাম টগল ও অন্যান্য ফাংশন (আগের মতো) ===
-  // =======================================================
-  
-  document.getElementById('columnDropdown').addEventListener('change', function(event) {
-      if (event.target.type === 'checkbox') {
-          const columnIndex = event.target.dataset.column;
-          const columnClass = `hidden-col-${columnIndex}`;
-          
-          const header = document.querySelector('.transaction-table-header');
-          const bodyRows = document.querySelectorAll('#transactionBody .transaction-item');
+function changeRowsPerPage(newRowsPerPage) {
+    rowsPerPage = parseInt(newRowsPerPage); 
+    currentPage = 1; 
+    
+    displayTransactions();
+    setupPagination();
+}
 
-          if (event.target.checked) {
-              header.classList.remove(columnClass);
-              bodyRows.forEach(row => row.classList.remove(columnClass));
-          } else {
-              header.classList.add(columnClass);
-              bodyRows.forEach(row => row.classList.add(columnClass));
-          }
-      }
-  });
+function filterByCategory() {
+ 
+    currentPage = 1;
+    displayTransactions(); 
+    setupPagination();
+    updateResultAmount(); 
+}
 
-  document.getElementById('toggleColumnsBtn').addEventListener('click', function() {
-      const dropdown = document.getElementById('columnDropdown');
-      
-      if (dropdown.style.display === 'block') {
-          dropdown.style.display = 'none';
-      } else {
-          dropdown.style.display = 'block';
-      }
-  });
-  
-  document.addEventListener('click', function(event) {
-      const dropdown = document.getElementById('columnDropdown');
-      const button = document.getElementById('toggleColumnsBtn');
-      
-      if (dropdown.style.display === 'block' && event.target !== dropdown && event.target !== button) {
-           dropdown.style.display = 'none';
-      }
-  });
-
-  document.querySelectorAll('#transactionBody > div').forEach(function(el) {
-      if (!el.classList.contains('transaction-item')) {
-          el.classList.add('transaction-item');
-      }
-  });
+const outCategorySelect = document.getElementById('outcategory');
+if (outCategorySelect) {
+    outCategorySelect.addEventListener('change', toggleSalaryEmployeeSelect);
+}
 
 
-  // =======================================================
-  // === ড্রপডাউন পূরণের ফাংশন (আপডেট করা) ===
-  // =======================================================
+// =======================================================
+// === ১০. কলাম টগল ও অন্যান্য ফাংশন (পরিবর্তন হয়নি) ===
+// =======================================================
+
+document.getElementById('columnDropdown').addEventListener('change', function(event) {
+    if (event.target.type === 'checkbox') {
+        const columnIndex = event.target.dataset.column;
+        const columnClass = `hidden-col-${columnIndex}`;
+        
+        const header = document.querySelector('.transaction-table-header');
+        const bodyRows = document.querySelectorAll('#transactionBody .transaction-item');
+
+        if (event.target.checked) {
+            header.classList.remove(columnClass);
+            bodyRows.forEach(row => row.classList.remove(columnClass));
+        } else {
+            header.classList.add(columnClass);
+            bodyRows.forEach(row => row.classList.add(columnClass));
+        }
+    }
+});
+
+document.getElementById('toggleColumnsBtn').addEventListener('click', function() {
+    const dropdown = document.getElementById('columnDropdown');
+    
+    if (dropdown.style.display === 'block') {
+        dropdown.style.display = 'none';
+    } else {
+        dropdown.style.display = 'block';
+    }
+});
+
+document.addEventListener('click', function(event) {
+    const dropdown = document.getElementById('columnDropdown');
+    const button = document.getElementById('toggleColumnsBtn');
+    
+    if (dropdown && button && dropdown.style.display === 'block' && event.target !== dropdown && event.target !== button) {
+         dropdown.style.display = 'none';
+    }
+});
+
+document.querySelectorAll('#transactionBody > div').forEach(function(el) {
+    if (!el.classList.contains('transaction-item')) {
+        el.classList.add('transaction-item');
+    }
+});
+
+
+// =======================================================
+// === ১১. ড্রপডাউন পূরণের ফাংশন (পরিবর্তন হয়নি) ===
+// =======================================================
 
 function populateFormSelects() {
-    // ইন ক্যাটাগরি
     populateSelect('incategory', IN_CATEGORIES_HTML, false, 'প্রজেক্ট 🔬');
-    // ইন পার্সন (জমা করা, ব্যাংক ডিপি)
     populateSelect('inperson', IN_PERSONS_HTML, false, 'জমা💰করা');
     
-    // আউট ক্যাটাগরি
     populateSelect('outcategory', OUT_CATEGORIES, false, 'বাজার🛍️সদাই');
-    // আউট পার্সন (জমা টাকা, ব্যাংক চেক)
     populateSelect('outperson', OUT_PERSONS, false, cashOutPerson);
 }
 
 
 function loadSelectOptions() {
-    
-    // **[নতুন]** - Database থেকে Employee List লোড করা
     EMPLOYEES_LIST = loadEmployeesFromDatabase(); 
     
-    // A. ইনপুট ফর্ম ড্রপডাউনগুলি পূরণ করা
     populateFormSelects(); 
     
-    // B. স্যালারি ড্রপডাউন পূরণ করা
     populateSalaryEmployeeSelect(); 
     
-    // C. ফিল্টার ড্রপডাউন পূরণ করা
     const allCategories = [...IN_CATEGORIES_HTML, ...OUT_CATEGORIES];
     populateSelect('categoryFilter', allCategories, true); 
 }
@@ -2016,15 +2009,12 @@ function populateSelect(elementId, optionsArray, isFilter = false, defaultValue 
     const selectElement = document.getElementById(elementId);
     if (!selectElement) return;
 
-    // হার্ডকোড করা অপশনগুলি সরিয়ে দেওয়া
     if (!isFilter) {
          selectElement.innerHTML = '';
     }
     
-    // HTML-এ হার্ডকোড করা অপশনগুলি ধরে রাখা (ফিল্টারের জন্য)
     const existingOptions = Array.from(selectElement.options).map(opt => opt.value);
     
-    // নতুন অপশন যোগ করা
     optionsArray.forEach(optionValue => {
         if (!existingOptions.includes(optionValue) || !isFilter) {
             const option = document.createElement('option');
@@ -2034,30 +2024,25 @@ function populateSelect(elementId, optionsArray, isFilter = false, defaultValue 
         }
     });
     
-    // ডিফল্ট ভ্যালু সেট করা
     if (defaultValue && selectElement.querySelector(`option[value="${defaultValue}"]`)) {
         selectElement.value = defaultValue;
     } else if (selectElement.options.length > 0) {
-        // যদি ডিফল্ট না থাকে, তবে প্রথমটি সেট করা
         selectElement.selectedIndex = 0;
     }
 }
 
 
 // =======================================================
-// === ডেট রেঞ্জ ফিল্টার UI/UX ফাংশন (চূড়ান্ত ফিক্স) ===
+// === ১২. ডেট রেঞ্জ ফিল্টার UI/UX ফাংশন (পরিবর্তন হয়নি) ===
 // =======================================================
 
 function openDateRangeModal() {
-    // Modal খোলা
     document.getElementById('dateRangeModal').style.display = 'flex';
     
-    // বর্তমান মান Modal ইনপুটে লোড করা
     const startDateInput = document.getElementById('startDateFilter');
     const endDateInput = document.getElementById('endDateFilter');
     const dateFilterBtn = document.getElementById('dateFilterBtn');
     
-    // যদি ডেট সিলেক্ট করা থাকে, তবে Modal-এ তা দেখাবে
     if (dateFilterBtn.dataset.startDate) {
         startDateInput.value = dateFilterBtn.dataset.startDate;
         endDateInput.value = dateFilterBtn.dataset.endDate;
@@ -2076,33 +2061,25 @@ function setDateRangeAndFilter() {
     const startDateVal = startDateInput.value;
     const endDateVal = endDateInput.value;
     
-    // যদি একটি ডেটও নির্বাচন করা হয়
     if (startDateVal || endDateVal) {
         
-        // বাটনের ডেটা সেট করা
         dateFilterBtn.dataset.startDate = startDateVal;
         dateFilterBtn.dataset.endDate = endDateVal;
         
-        // বাটনে কোনো তারিখের টেক্সট পরিবর্তন হবে না।
         dateFilterBtn.classList.add('filter-active'); 
         
-        // ❌ বাটনটি দেখান
         if (clearDateBtn) {
            clearDateBtn.style.display = 'inline-block'; 
         }
         
-        // Modal বন্ধ করা
         const dateRangeModal = document.getElementById('dateRangeModal');
         if(dateRangeModal) dateRangeModal.style.display = 'none';
         
-        // ফিল্টার প্রয়োগ করা
         applyFilters(); 
         
     } else {
-         // যদি কোনো ডেট সিলেক্ট না করেই "প্রয়োগ করুন" ক্লিক করে
         clearDateRange();
         
-        // Modal বন্ধ করা
         const dateRangeModal = document.getElementById('dateRangeModal');
         if(dateRangeModal) dateRangeModal.style.display = 'none';
     }
@@ -2113,46 +2090,58 @@ function clearDateRange() {
     const dateFilterBtn = document.getElementById('dateFilterBtn');
     const clearDateBtn = document.getElementById('clearDateBtn');
     
-    // বাটনের ডেটা রিসেট করা
     dateFilterBtn.dataset.startDate = '';
     dateFilterBtn.dataset.endDate = '';
 
-    // বাটনের active ক্লাস থাকলে সেটি সরিয়ে দিন
     dateFilterBtn.classList.remove('filter-active');
 
-    // ডিলিট আইকন লুকিয়ে রাখা
     if (clearDateBtn) {
         clearDateBtn.style.display = 'none';
     }
     
-    // ফিল্টার পুনরায় প্রয়োগ করা
     applyFilters(); 
 }
 
 
+// =======================================================
+// === ১৩. পেজ লোড হলে শুরু করা (Firebase Listener যোগ করা হয়েছে) ===
+// =======================================================
 
-  // =======================================================
-  // === পেজ লোড হলে শুরু করা ===
-  // =======================================================
-
-  window.onload = function() {
-    calculateAndDisplayBalance();
-    
-    // ফিল্টার অপশন লোড করা 
-    loadSelectOptions(); 
-    
-    const rowsSelect = document.getElementById('rowsPerPageSelect');
-    if (rowsSelect) {
-      rowsPerPage = parseInt(rowsSelect.value); 
+window.onload = function() {
+    // শুধুমাত্র যদি Firebase লোড হয়ে থাকে
+    if (typeof firebase !== 'undefined') {
+        
+        // Firebase থেকে ট্রানজেকশন ডেটা রিয়েলটাইমে লোড করা
+        transactionsRef.on('value', (snapshot) => {
+            const fetchedData = snapshot.val();
+            
+            // ডেটা অ্যারেতে রূপান্তর করা এবং প্রতিটিতে Firebase key (id) যুক্ত করা
+            transactions = fetchedData ? 
+                Object.keys(fetchedData).map(key => ({ ...fetchedData[key], id: key })) 
+                : []; 
+            
+            // **ডেটা লোড হওয়ার পর সমস্ত ফাংশন কল করা**
+            calculateAndDisplayBalance();
+            loadSelectOptions(); 
+            
+            const rowsSelect = document.getElementById('rowsPerPageSelect');
+            if (rowsSelect) {
+              rowsPerPage = parseInt(rowsSelect.value); 
+            }
+            
+            displayTransactions(); // ডেটা দেখাবে
+            setupPagination();
+            updateResultAmount(); // ফলাফল আপডেট
+        });
+    } else {
+         // যদি Firebase লোড না হয় তবে লোকাল ফলব্যাক (ঐচ্ছিক)
+         console.warn("Firebase লোড না হওয়ায় ডেটা দেখানো সম্ভব হচ্ছে না।");
     }
 
-    displayTransactions();
-    setupPagination();
-    
     const now = new Date();
     const today = now.toISOString().substring(0, 10);
     
-    // Date input সেট করা (ফর্মের জন্য)
+    // Date/Time UI সেট করা 
     const datePickerIn = document.getElementById("datePickerIn");
     if(datePickerIn) datePickerIn.value = today;
     const showDateIn = document.getElementById("showDateIn");
@@ -2163,14 +2152,8 @@ function clearDateRange() {
     const showDateOut = document.getElementById("showDateOut");
     if(showDateOut) showDateOut.innerText = today;
 
-    
-    // লোড হওয়ার সময় ডেট ফিল্টার UI সেট করা
     clearDateRange(); 
-  };
-
-
-</script>
-
+};
 
 
 </body>
