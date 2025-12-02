@@ -258,13 +258,13 @@
   gap: 100px;
 }
 /* ছোট select */
-.account-type-a {
+.account-type-b {
   width: 200px!important;
   padding: 8px;
   border-radius: 6px;
   border: 1px solid #ccc;
 }
-.account-type-b {
+.account-type-a {
 width: 200px!important;
   padding: 8px;
   border-radius: 6px;
@@ -902,7 +902,7 @@ width: 200px!important;
     <div class="button-row">
         <button class="cancel-btn" 
           onclick="closeForm()">Cancel</button>
-        <button class="save-btn" onclick="saveIn()">Save</button>
+        <button class="save-btn" id="inSaveBtn" onclick="saveIn()">Save</button>
     </div>
 </div>
 
@@ -954,7 +954,7 @@ width: 200px!important;
         <div class="button-row">
           <button class="cancel-btn" 
           onclick="closeForm()">Cancel</button>
-          <button class="save-btn" onclick="saveOut()">Save</button>
+          <button class="save-btn" id="outSaveBtn" onclick="saveOut()">Save</button>
         </div>
     </div>
 
@@ -1090,9 +1090,9 @@ width: 200px!important;
 
 
 <script>
-
-
-
+// =======================================================
+// === ১. ফায়ারবেজ কনফিগারেশন ও ইনিশিয়ালাইজেশন ===
+// =======================================================
 const firebaseConfig = {
   apiKey: "AIzaSyDB9ZXgG1S0Io2OqJc50DkTJotraHJ6tsA",
   authDomain: "kingfishar-data.firebaseapp.com",
@@ -1155,8 +1155,13 @@ let isEditingIndex = null;
 let startDate = null; 
 let endDate = null; 
 
+// **সংশোধন ২:** EMPLOYEES_LIST গ্লোবালি ঘোষণা করা হলো
+let EMPLOYEES_LIST = []; 
+
+
 // Employee List Loading - পরিবর্তন হয়নি
 function loadEmployeesFromDatabase() {
+    // এখানে আপনার employee list লোডিং লজিক রয়েছে
     const employeesJson = localStorage.getItem('employees');
     const allEmployees = employeesJson ? JSON.parse(employeesJson) : [];
     return allEmployees.map(emp => ({
