@@ -342,87 +342,14 @@
     
       <form id="employeeForm"> 
         
-        <h3>ব্যক্তিগত তথ্য</h3>
-        
         <label for="name">নাম:</label>
         <input type="text" id="name" name="name" placeholder="সম্পূর্ণ নাম" required>
-        
-        <label for="fatherName">Father Name:</label>
-        <input type="text" id="fatherName" name="fatherName" placeholder="Father Name">
-        
-        <label for="dob">Date Of Birth:</label>
-        <input type="date" id="dob" name="dob" required>
-
-        <label for="religion">ধর্ম:</label>
-        <select id="religion" name="religion" required>
-            <option value="">নির্বাচন করুন</option>
-            <option value="Islam">ইসলাম</option>
-            <option value="Hinduism">হিন্দু ধর্ম</option>
-            <option value="Christianity">খ্রিস্ট ধর্ম</option>
-            <option value="Buddhism">বৌদ্ধ ধর্ম</option>
-            <option value="Other">অন্যান্য</option>
-        </select>
-        
-        <label for="bloodGroup">রক্তের গ্রুপ:</label>
-        <select id="bloodGroup" name="bloodGroup">
-            <option value="">নির্বাচন করুন</option>
-            <option value="A+">A+</option>
-            <option value="A-">A-</option>
-            <option value="B+">B+</option>
-            <option value="B-">B-</option>
-            <option value="AB+">AB+</option>
-            <option value="AB-">AB-</option>
-            <option value="O+">O+</option>
-            <option value="O-">O-</option>
-        </select>
-        
-        <label for="nidNo">NID NO:</label>
-        <input type="text" id="nidNo" name="nidNo" placeholder="NID NO" required>
-        
-        <h3>যোগাযোগ ও জরুরী তথ্য</h3>
         
         <label for="mobileNo">মোবাইল নম্বর:</label>
         <input type="tel" id="mobileNo" name="mobileNo" placeholder="মোবাইল নম্বর" required>
         
-        <label for="email">ইমেইল:</label>
-        <input type="email" id="email" name="email" placeholder="example@gmail.com" required>
-        
-        <label for="address">বর্তমান ঠিকানা:</label>
-        <input type="text" id="address" name="address" placeholder="ঠিকানা" required>
-
-        <label for="emergencyContact">জরুরী যোগাযোগ:</label>
-        <input type="tel" id="emergencyContact" name="emergencyContact" placeholder="জরুরী নম্বর">
-
-        <h3>চাকরির তথ্য</h3>
-        
-        <label for="designation">পদবি:</label>
-        <input type="text" id="designation" name="designation" placeholder="পদবি" required>
-
-        <label for="jobType">চাকরির ধরন:</label>
-        <select id="jobType" name="jobType" required>
-            <option value="">নির্বাচন করুন</option>
-            <option value="Permanent">স্থায়ী</option>
-            <option value="Contractual">চুক্তিভিত্তিক</option>
-            <option value="Part-time">খণ্ডকালীন</option>
-            <option value="Intern">ইন্টার্ন</option>
-        </select>
-
-        <label for="joiningDate">যোগদানের তারিখ:</label>
-        <input type="date" id="joiningDate" name="joiningDate" required>
-        
         <label for="salary">মাসিক বেতন:</label>
         <input type="number" id="salary" name="salary" placeholder="বেতন (টাকা)" required>
-        
-        <h3>শিক্ষাগত যোগ্যতা ও অভিজ্ঞতা</h3>
-
-        <label for="education">শিক্ষাগত যোগ্যতা:</label>
-        <input type="text" id="education" name="education" placeholder="যেমন: B.Sc. in CSE" required>
-        
-        <label for="experience">অভিজ্ঞতা (সংক্ষেপে):</label>
-        <textarea id="experience" name="experience" rows="3" placeholder="পূর্ববর্তী কাজের বিবরণ..."></textarea>
-
-        <label for="photo">কর্মচারীর ছবি:</label>
-        <input type="file" id="photo" name="photo" accept="image/*">
         
         <button type="submit" id="submitBtn">যোগ করুন</button>
       </form>
@@ -490,6 +417,11 @@
     // স্যালারি পেমেন্ট স্ট্যাটাস ইনিশিয়ালাইজ করা
     employee.salaryPaid = parseFloat(employee.salaryPaid) || 0; 
     employee.lastPaidDate = employee.lastPaidDate || null;
+    
+    // বাদ যাওয়া ফিল্ডগুলোর জন্য ডিফল্ট ভ্যালু সেট করা যাতে অন্য পেজে সমস্যা না হয় (যেমন: designation)
+    employee.designation = 'General Employee'; 
+    employee.photoDataUrl = '';
+    employee.joiningDate = new Date().toISOString().slice(0, 10); // আজকের তারিখ
 
     employees.push(employee);
     
@@ -527,9 +459,7 @@
         employee[key] = value;
     }
     
-    // ✅ ফিক্স: ছবি ফাইল লোড করার কোড বাদ দেওয়া হলো। 
-    // শুধু একটি খালি ডেটা URL সেট করা হচ্ছে।
-    employee.photoDataUrl = ''; 
+    // ছবি ফাইল লোড করার কোড বাদ দেওয়া আছে, এখন সেভ করা হচ্ছে
     saveAndReload(employee);
   });
 
@@ -636,7 +566,7 @@
       }
   }
 
-  // ⭐ ডিটেইলস দেখানোর ফাংশন ⭐
+  // ⭐ ডিটেইলস দেখানোর ফাংশন (শুধুমাত্র গুরুত্বপূর্ণ তথ্যগুলো রাখা হলো) ⭐
   function showEmployeeDetails(index) {
       const employees = JSON.parse(localStorage.getItem('employees')) || [];
       const emp = employees[index];
@@ -652,22 +582,16 @@
           </div>
           
           <div class="detail-item">
-              <strong>যোগদান তারিখ:</strong> <span>${emp.joiningDate || 'N/A'}</span>
+              <strong>নাম:</strong> <span>${emp.name || 'N/A'}</span>
           </div>
           <div class="detail-item">
               <strong>মোবাইল:</strong> <span>${emp.mobileNo || 'N/A'}</span>
           </div>
           <div class="detail-item">
-              <strong>ইমেইল:</strong> <span>${emp.email || 'N/A'}</span>
-          </div>
-          <div class="detail-item">
-              <strong>NID NO:</strong> <span>${emp.nidNo || 'N/A'}</span>
-          </div>
-          <div class="detail-item">
-              <strong>ঠিকানা:</strong> <span>${emp.address || 'N/A'}</span>
-          </div>
-          <div class="detail-item">
               <strong>মাসিক বেতন:</strong> <span>${emp.salary ? emp.salary + ' টাকা' : 'N/A'}</span>
+          </div>
+          <div class="detail-item">
+              <strong>যোগদান তারিখ:</strong> <span>${emp.joiningDate || 'N/A'}</span>
           </div>
           <div class="detail-item">
               <strong>মোট বেতন পরিশোধ:</strong> <span style="font-weight: bold; color: green;">${emp.salaryPaid ? emp.salaryPaid + ' টাকা' : '০ টাকা'}</span>
@@ -678,15 +602,7 @@
           <div class="detail-item">
               <strong>বর্তমান স্ট্যাটাস:</strong> <span>${getSalaryStatus(emp)}</span>
           </div>
-          <div class="detail-item">
-              <strong>রক্তের গ্রুপ:</strong> <span>${emp.bloodGroup || 'N/A'}</span>
-          </div>
-          <div class="detail-item">
-              <strong>শিক্ষাগত যোগ্যতা:</strong> <span>${emp.education || 'N/A'}</span>
-          </div>
-          <div class="detail-item">
-              <strong>অভিজ্ঞতা:</strong> <span>${emp.experience || 'N/A'}</span>
-          </div>
+          
       `;
       
       displayContainer.innerHTML = detailsHTML;
@@ -706,3 +622,5 @@
   
 </body>
 </html>
+
+
