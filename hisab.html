@@ -849,9 +849,9 @@ width: 200px!important;
       <div class="card card1"><p>৳ 0</p><h3>জমা আছে </h3></div>
       <div class="card card2"><p>৳ 0</p><h3>আজকের জমা </h3></div>
       <div class="card card3"><p>৳ 0</p><h3>আজকে খরচ</h3></div>
-      <div class="card card4"><p>৳ 0</p><h3>সর্বমোট জমা</h3></div>
+      <div class="card card4"><p>৳ 0</p><h3>লোন দিয়েছে</h3></div> 
       <div class="card card5"><p>৳ 0</p><h3>King🏦Bank</h3></div>
-      <div class="card card6"><p>৳ 0</p><h3>মোট ঋণ</h3></div>
+      <div class="card card6"><p>৳ 0</p><h3>কম্পানির ঋণ</h3></div>
     </div>
   </div>
 
@@ -868,6 +868,7 @@ width: 200px!important;
   <option value="" disabled selected>Select</option>           <option>প্রজেক্ট 🔬</option>
             <option>👜RRR Bazar</option>
             <option>ঋন নেওয়া🩸</option>
+             <option>লোন পরিশোধ🫲</option> 
         </select>
         
        <select class="account-type-b" id="inperson"required>
@@ -910,7 +911,9 @@ width: 200px!important;
             <option>নাস্তা🥪,লাঞ্চ,🍜</option>
             <option>এক্সোসেরিজ🛒</option>
             <option>সার্ভিস🔧কস্ট</option>
-            <option>ঋন দেওয়া♻️</option> 
+            <option>ঋন দেওয়া♻️</option>
+            <option>লোন নেওয়া🫱️</option>
+            <option>Advance 💸</option> 
             <option>💵Salary💶</option>
         </select>
         
@@ -919,10 +922,10 @@ width: 200px!important;
     <option value="ব্যাংক🔰চেক">ব্যাংক🔰চেক</option>
     </select>
    </div>
-   
+
    <div id="salaryEmployeeSelectContainer" style="display:none;">
     <select class="account-type-b" id="salaryEmployeeSelect" required>
-        <option value="" disabled selected>কার বেতন?</option>
+        <option value="" disabled selected>কার বেতন/অ্যাডভান্স?</option>
         </select>
 </div>
 
@@ -1008,6 +1011,9 @@ width: 200px!important;
         <option>সার্ভিস🔧কস্ট</option>
         <option>ঋন নেওয়া🩸</option>
         <option>ঋন দেওয়া♻️</option>
+        <option>লোন পরিশোধ🫲</option>
+        <option>লোন নেওয়া🫱</option>
+        <option>Advance 💸</option>
         <option>💵Salary💶</option>
         </select>
 
@@ -1134,25 +1140,38 @@ let transactionsRef;
 
 
 // =======================================================
-// === ২. গ্লোবাল ডেটা তালিকা ও কনস্ট্যান্টস (পরিবর্তন হয়নি) ===
+// === ২. গ্লোবাল ডেটা তালিকা ও কনস্ট্যান্টস (আপডেট করা হয়েছে) ===
 // =======================================================
 
 const OUT_CATEGORIES = [
-    '🫙🍱 সদাই 🛒🛍️', '🍆🥬 বাজার 🌶️🥔', 'যাতায়াত🚕খরচ', '👥 মার্কেটিং টিম 🏪', 'নাস্তা🥪,লাঞ্চ,🍜', 
-    'এক্সোসেরিজ🛒', 'সার্ভিস🔧কস্ট', 'ঋন দেওয়া♻️', '💵Salary💶'
+    '🍆🥬 বাজার 🌶️🥔', '🫙🍱 সদাই 🛒🛍️', 'যাতায়াত🚕খরচ', '👥 মার্কেটিং টিম 🏪', 'নাস্তা🥪,লাঞ্চ,🍜', 
+    'এক্সোসেরিজ🛒', 'সার্ভিস🔧কস্ট', 'ঋন দেওয়া♻️', 'লোন নেওয়া🫱️', 'Advance 💸', '💵Salary💶' 
 ];
 const OUT_PERSONS = [
     'জমা টাকা💵', 'ব্যাংক🔰চেক'
 ];
 
-const IN_CATEGORIES_HTML = ['প্রজেক্ট 🔬', '👜RRR Bazar', 'ঋন নেওয়া🩸']; 
+const IN_CATEGORIES_HTML = ['প্রজেক্ট 🔬', '👜RRR Bazar', 'ঋন নেওয়া🩸', 'লোন পরিশোধ🫲']; 
 const IN_PERSONS_HTML = ['জমা💰করা', 'BANK🏦DP']; 
 
 const kingBankCategory = 'BANK🏦DP';
 const cashOutPerson = 'জমা টাকা💵'; 
 const bankOutPerson = 'ব্যাংক🔰চেক';
-const loanTakenCategory = 'ঋন নেওয়া🩸';
-const loanGivenCategory = 'ঋন দেওয়া♻️';
+const salaryCategory = '💵Salary💶';
+const advanceCategory = 'Advance 💸';
+
+// **ইউজারের নতুন লজিক অনুযায়ী লোন/ঋণ ক্যাটাগরি সেট করা হয়েছে**
+// কার্ড ৪: লোন দিয়েছে (Total Receivable - কোম্পানির পাওনা):
+// যোগ হবে: লোন নেওয়া🫱️ (Cash Out) -> লোন দিয়েছে পাওনা বাড়ায়
+const loanReceivedCategory = 'লোন নেওয়া🫱️'; // Cash Out 
+// বিয়োগ হবে: লোন পরিশোধ🫲 (Cash In) -> লোন দিয়েছে পাওনা কমায়
+const loanRepaidCategory = 'লোন পরিশোধ🫲'; // Cash In
+
+// কার্ড ৬: কম্পানির ঋণ (Total Payable - কোম্পানির দেনা):
+// যোগ হবে: ঋন নেওয়া🩸 (Cash In) -> দেনা বাড়ায়
+const loanTakenCategory = 'ঋন নেওয়া🩸'; // Cash In
+// বিয়োগ হবে: ঋন দেওয়া♻️ (Cash Out) -> দেনা কমায়
+const loanGivenCategory = 'ঋন দেওয়া♻️'; // Cash Out
 
 
 // =======================================================
@@ -1263,8 +1282,11 @@ function closeForm() {
     const outSaveBtn = document.getElementById('outSaveBtn');
     if (outSaveBtn) outSaveBtn.innerText = 'Save';
     
+    // employee select রিসেট
     const employeeSelectContainer = document.getElementById('salaryEmployeeSelectContainer');
     if (employeeSelectContainer) employeeSelectContainer.style.display = 'none';
+    const employeeSelect = document.getElementById('salaryEmployeeSelect');
+    if (employeeSelect) employeeSelect.value = '';
     
     const inCategorySelect = document.getElementById('incategory');
     if (inCategorySelect) { inCategorySelect.selectedIndex = inCategorySelect.options.length > 1 ? 1 : 0; }
@@ -1335,83 +1357,101 @@ if(datePickerOut) datePickerOut.addEventListener("change", function () {
 
 
 // =======================================================
-// === ৫. ব্যালেন্স ও কার্ড আপডেট ফাংশন (পরিবর্তন হয়নি) ===
+// === ৫. ব্যালেন্স ও কার্ড আপডেট ফাংশন (আপডেট করা হয়েছে) ===
 // =======================================================
 function calculateAndDisplayBalance() {
-    let totalOut = 0;   
+    let netCashBalance = 0;   
     let totalInToday = 0;
     let totalOutToday = 0;
-    let totalInCash = 0;  
     let totalKingBank = 0;  
-    let totalLoan = 0;
+    let totalCompanyReceivable = 0; // কার্ড ৪: লোন দিয়েছে (কোম্পানির পাওনা/Asset)
+    let totalCompanyPayable = 0;   // কার্ড ৬: কম্পানির ঋণ (কোম্পানির দেনা/Liability)
     
-    const loanTakenCategory = 'ঋন নেওয়া🩸';
-    const loanGivenCategory = 'ঋন দেওয়া♻️';
+    // Cash In/Out
+    let totalCashIn = 0;
+    let totalCashOut = 0;
 
     transactions.forEach(t => {
+        // --- ক্যাশ ব্যালেন্স এবং ব্যাংক ব্যালেন্স ---
         if (t.type === 'in') {
             if (t.person === kingBankCategory) { 
-                totalKingBank += t.amount; 
+                totalKingBank += t.amount; // ব্যাংক জমা
             } else {
-                totalInCash += t.amount;   
+                totalCashIn += t.amount;   // ক্যাশ জমা (লোন পরিশোধ, ক্যাশ ইন)
             }
         } 
         else if (t.type === 'out') {
-            totalOut += t.amount;
-            
+            totalCashOut += t.amount;
            if (t.person === bankOutPerson) {
-                totalKingBank -= t.amount; 
+                totalKingBank -= t.amount; // ব্যাংক খরচ
             }
         }   
         
-        if (t.type === 'in' && t.category === loanTakenCategory) {
-            totalLoan += t.amount;  
+        // --- কার্ড ৪: লোন দিয়েছে (কোম্পানির পাওনা/Asset) ---
+        // যোগ হবে: লোন নেওয়া🫱️ (Cash Out) -> আপনার পাওনা বাড়ায়
+        if (t.type === 'out' && t.category === loanReceivedCategory) { 
+            totalCompanyReceivable += t.amount; 
         }
-        if (t.type === 'out' && t.category === loanGivenCategory) {
-            totalLoan -= t.amount; 
+        // বিয়োগ হবে: লোন পরিশোধ🫲 (Cash In) -> আপনার পাওনা কমায়
+        if (t.type === 'in' && t.category === loanRepaidCategory) {
+            totalCompanyReceivable -= t.amount;
         }
 
+        // --- কার্ড ৬: কম্পানির ঋণ (কোম্পানির দেনা/Liability) ---
+        // যোগ হবে: ঋন নেওয়া🩸 (Cash In) -> দেনা বাড়ায়
+        if (t.type === 'in' && t.category === loanTakenCategory) {
+            totalCompanyPayable += t.amount;  
+        }
+        // বিয়োগ হবে: ঋন দেওয়া♻️ (Cash Out) -> দেনা কমায়
+        if (t.type === 'out' && t.category === loanGivenCategory) { 
+            totalCompanyPayable -= t.amount; 
+        }
+
+        // --- আজকের হিসাব ---
         if (t.date === today) {
+            // কার্ড ২: আজকের জমা (নগদ জমা, ব্যাংক জমা নয়)
             if (t.type === 'in' && t.person !== kingBankCategory) { 
                 totalInToday += t.amount;
             } 
+            // কার্ড ৩: আজকের খরচ (নগদ খরচ + ব্যাংক খরচ)
             else if (t.type === 'out') {
                 totalOutToday += t.amount;
             }
         }
     });
     
+    // নেট ক্যাশ ব্যালেন্স
     let totalCashOutFromCash = transactions
         .filter(t => t.type === 'out' && t.person === cashOutPerson)
         .reduce((sum, t) => sum + t.amount, 0);
 
-    let netBalance = totalInCash - totalCashOutFromCash; 
-    const totalDeposit = totalInCash + totalKingBank; 
-
+    netCashBalance = totalCashIn - totalCashOutFromCash;
+    
+    // কার্ডে প্রদর্শন
     const card1 = document.querySelector('.card1 p');
-    if(card1) card1.innerText = `৳ ${netBalance.toFixed(0)}`;     
+    if(card1) card1.innerText = `৳ ${netCashBalance.toFixed(0)}`;     
     const card2 = document.querySelector('.card2 p');
     if(card2) card2.innerText = `৳ ${totalInToday.toFixed(0)}`;   
     const card3 = document.querySelector('.card3 p');
     if(card3) card3.innerText = `৳ ${totalOutToday.toFixed(0)}`;  
     const card4 = document.querySelector('.card4 p');
-    if(card4) card4.innerText = `৳ ${totalDeposit.toFixed(0)}`;   
+    if(card4) card4.innerText = `৳ ${totalCompanyReceivable.toFixed(0)}`;   
     const card5 = document.querySelector('.card5 p');
     if(card5) card5.innerText = `৳ ${totalKingBank.toFixed(0)}`;  
     const card6 = document.querySelector('.card6 p');
-    if(card6) card6.innerText = `৳ ${totalLoan.toFixed(0)}`;      
+    if(card6) card6.innerText = `৳ ${totalCompanyPayable.toFixed(0)}`;      
 }
 
 
 // =======================================================
-// === ৬. স্যালারি ড্রপডাউন লজিক (পরিবর্তন হয়নি) ===
+// === ৬. স্যালারি/অ্যাডভান্স ড্রপডাউন লজিক (আপডেট করা হয়েছে) ===
 // =======================================================
 
 function populateSalaryEmployeeSelect() {
     const select = document.getElementById('salaryEmployeeSelect');
     if (!select) return;
 
-    select.innerHTML = '<option value="" disabled selected>কার বেতন?</option>';
+    select.innerHTML = '<option value="" disabled selected>কার বেতন/অ্যাডভান্স?</option>';
 
     EMPLOYEES_LIST.forEach(employee => {
         const option = document.createElement('option');
@@ -1428,18 +1468,21 @@ function toggleSalaryEmployeeSelect() {
     
     if (!employeeSelectContainer || !employeeSelect) return;
 
-    if (outCategorySelect.value === '💵Salary💶') {
+    const isEmployeeRequired = outCategorySelect.value === salaryCategory || outCategorySelect.value === advanceCategory;
+
+    if (isEmployeeRequired) {
         employeeSelectContainer.style.display = 'block';
         employeeSelect.setAttribute('required', 'required'); 
     } else {
         employeeSelectContainer.style.display = 'none';
         employeeSelect.removeAttribute('required');
+        employeeSelect.value = ''; // রিসেট
     }
 }
 
 
 // =======================================================
-// === ৭. ট্রানজেকশন ফিল্টারিং, সর্টিং, সেভ, এডিট, ডিলিট ফাংশন (সেভ আপডেট করা হয়েছে) ===
+// === ৭. ট্রানজেকশন ফিল্টারিং, সর্টিং, সেভ, এডিট, ডিলিট ফাংশন (আপডেট করা হয়েছে) ===
 // =======================================================
   
 function getTransactionSortKey(t) {
@@ -1574,15 +1617,19 @@ function saveTransaction(type) {
         return;
     }
     
-    if (type === 'out' && categoryValue === '💵Salary💶') {
+    // **স্যালারি/অ্যাডভান্স লজিক আপডেট**
+    if (type === 'out' && (categoryValue === salaryCategory || categoryValue === advanceCategory)) {
         const salaryEmployeeSelect = document.getElementById('salaryEmployeeSelect');
-        if (salaryEmployeeSelect && !salaryEmployeeSelect.value) { // <--- এখানে ভ্যালিডেশন ফিক্স করা হয়েছে
-             alert("বেতন দেওয়ার জন্য কর্মচারীকে নির্বাচন করুন।");
+        if (salaryEmployeeSelect && !salaryEmployeeSelect.value) { 
+             alert("বেতন/অ্যাডভান্স দেওয়ার জন্য কর্মচারীকে নির্বাচন করুন।");
              return; 
         }
         if (salaryEmployeeSelect && salaryEmployeeSelect.value) {
             const selectedEmployeeOption = salaryEmployeeSelect.options[salaryEmployeeSelect.selectedIndex].textContent;
-            descriptionValue = `বেতন: ${selectedEmployeeOption} - ${descriptionValue}`; 
+            
+            let prefix = categoryValue === salaryCategory ? 'বেতন' : 'অ্যাডভান্স';
+            
+            descriptionValue = `${prefix}: ${selectedEmployeeOption} - ${descriptionValue}`; 
         }
     }
 
@@ -1664,9 +1711,27 @@ function editTransaction(index) {
     const categorySelect = document.getElementById(`${type}category`);
     if (categorySelect) {
         categorySelect.value = t.category;
-        if (type === 'out' && t.category === '💵Salary💶') {
+        
+        // **স্যালারি/অ্যাডভান্স ড্রপডাউন দেখানোর জন্য লজিক যোগ করা হয়েছে**
+        if (type === 'out' && (t.category === salaryCategory || t.category === advanceCategory)) {
             const employeeSelectContainer = document.getElementById('salaryEmployeeSelectContainer');
+            const employeeSelect = document.getElementById('salaryEmployeeSelect');
             if (employeeSelectContainer) employeeSelectContainer.style.display = 'block';
+            
+            // বর্ণনা থেকে কর্মচারীর নাম বের করার চেষ্টা
+            const match = t.description.match(/(বেতন|অ্যাডভান্স): (.*?)( \((৳.*?)\))? -/);
+            if (match && employeeSelect) {
+                const employeeName = match[2].trim();
+                const employee = EMPLOYEES_LIST.find(e => t.description.includes(e.name));
+                if (employee) {
+                    employeeSelect.value = employee.id;
+                }
+            } else if (employeeSelect) {
+                employeeSelect.value = '';
+            }
+        } else {
+             const employeeSelectContainer = document.getElementById('salaryEmployeeSelectContainer');
+             if (employeeSelectContainer) employeeSelectContainer.style.display = 'none';
         }
     }
     
@@ -1762,12 +1827,17 @@ function displayTransactions() {
         const sign = t.type === 'in' ? '+' : '-';
    
         let customStyle = '';
-        if (t.type === 'in' && t.category === loanTakenCategory) {
-            customStyle = 'style="color: #5d30d9;"'; 
+        
+        // **আপডেট করা লজিক অনুযায়ী স্টাইল**
+        // কার্ড ৪: লোন দিয়েছে (পাওনা) - লোন নেওয়া🫱️, লোন পরিশোধ🫲
+        if (t.category === loanReceivedCategory || t.category === loanRepaidCategory) {
+            customStyle = 'style="color: #5d30d9; font-weight: bold;"'; 
         }
-        if (t.type === 'out' && t.category === loanGivenCategory) {
-            customStyle = 'style="color: #dd3be3;"'; 
+        // কার্ড ৬: কম্পানির ঋণ (দেনা) - ঋন নেওয়া🩸, ঋন দেওয়া♻️
+        if (t.category === loanTakenCategory || t.category === loanGivenCategory) {
+            customStyle = 'style="color: #dd3be3; font-weight: bold;"'; 
         }
+        // Bank DP (Cash In)
        else if (t.type === 'in' && t.person === kingBankCategory) { 
              customStyle = 'style="color: #007bff; font-weight: bold;"'; 
         }
@@ -1944,6 +2014,7 @@ function filterByCategory() {
     updateResultAmount(); 
 }
 
+// **ইভেন্ট লিসেনার আপডেট**
 const outCategorySelect = document.getElementById('outcategory');
 if (outCategorySelect) {
     outCategorySelect.addEventListener('change', toggleSalaryEmployeeSelect);
@@ -1999,7 +2070,7 @@ document.querySelectorAll('#transactionBody > div').forEach(function(el) {
 
 
 // =======================================================
-// === ১১. ড্রপডাউন পূরণের ফাংশন (পরিবর্তন হয়নি) ===
+// === ১১. ড্রপডাউন পূরণের ফাংশন (আপডেট করা হয়েছে) ===
 // =======================================================
 
 function populateFormSelects() {
@@ -2018,7 +2089,8 @@ function loadSelectOptions() {
     
     populateSalaryEmployeeSelect(); 
     
-    const allCategories = [...IN_CATEGORIES_HTML, ...OUT_CATEGORIES];
+    const allCategories = ['প্রজেক্ট 🔬', '👜RRR Bazar', 'ঋন নেওয়া🩸', 'লোন পরিশোধ🫲', '🍆🥬 বাজার 🌶️🥔', '🫙🍱 সদাই 🛒🛍️', 'যাতায়াত🚕খরচ', '👥 মার্কেটিং টিম 🏪', 'নাস্তা🥪,লাঞ্চ,🍜', 
+    'এক্সোসেরিজ🛒', 'সার্ভিস🔧কস্ট', 'ঋন দেওয়া♻️', 'লোন নেওয়া🫱️', 'Advance 💸', '💵Salary💶' ]; // সব ক্যাটাগরি একসাথে
     populateSelect('categoryFilter', allCategories, true); 
 }
 
@@ -2174,5 +2246,4 @@ window.onload = function() {
 </script>
 </body>
 </html>
-
 
