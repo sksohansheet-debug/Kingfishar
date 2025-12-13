@@ -865,8 +865,8 @@ width: 200px!important;
     <h1 class="cashintext">ক্যাশ ইন</h1>
     <div class="row-line-type">
        <select class="account-type-b" id="incategory"required>
-  <option value="" disabled selected>Select</option>          
              <option>প্রজেক্ট 🔬</option>
+             <option>Bank🏛️থেকে</option>
             <option>👜RRR Bazar</option>
             <option>ঋন নেওয়া🩸</option>
              <option>লোন পরিশোধ🫲</option> 
@@ -1152,8 +1152,12 @@ const OUT_PERSONS = [
     'জমা টাকা💵', 'ব্যাংক🔰চেক'
 ];
 
-const IN_CATEGORIES_HTML = ['প্রজেক্ট 🔬', '👜RRR Bazar', 'ঋন নেওয়া🩸', 'লোন পরিশোধ🫲']; 
-const IN_PERSONS_HTML = ['জমা💰করা', 'BANK🏦DP']; 
+// **পরিবর্তিত: Bank🏛️থেকে যোগ করা হয়েছে এবং ডিফল্ট মান সেট করা হয়েছে**
+const bankToCashCategory = 'Bank🏛️থেকে'; 
+const cashInPerson = 'জমা💰করা'; // Cash In এর ডিফল্ট পার্সন
+
+const IN_CATEGORIES_HTML = ['প্রজেক্ট 🔬', bankToCashCategory, '👜RRR Bazar', 'ঋন নেওয়া🩸', 'লোন পরিশোধ🫲']; 
+const IN_PERSONS_HTML = [cashInPerson, 'BANK🏦DP']; 
 
 const kingBankCategory = 'BANK🏦DP';
 const cashOutPerson = 'জমা টাকা💵'; 
@@ -1272,13 +1276,19 @@ function openForm(type) {
         // **সংশোধন ২:** এখানে setAutoTime কল করা হয়েছে
         setAutoTime(TypeCapital); 
 
+        // ✅ ফিক্সড: incategory এর ডিফল্ট মান 'প্রজেক্ট 🔬' সেট করা
         const inCategorySelect = document.getElementById('incategory');
-        if (inCategorySelect) { inCategorySelect.selectedIndex = inCategorySelect.options.length > 1 ? 1 : 0; }
+        if (inCategorySelect) { 
+             inCategorySelect.value = 'প্রজেক্ট 🔬';
+        }
+        
         const inPersonSelect = document.getElementById('inperson');
-        if (inPersonSelect) { inPersonSelect.value = 'জমা💰করা'; }
+        if (inPersonSelect) { inPersonSelect.value = cashInPerson; } // জমা💰করা
         
         const outCategorySelect = document.getElementById('outcategory');
-        if (outCategorySelect) { outCategorySelect.selectedIndex = outCategorySelect.options.length > 1 ? 1 : 0; }
+        // আউট ক্যাটাগরির ডিফল্ট মান সেট করা 
+        if (outCategorySelect) { outCategorySelect.selectedIndex = outCategorySelect.options.length > 0 ? 0 : -1; }
+        
         const outPersonSelect = document.getElementById('outperson');
         if (outPersonSelect) { outPersonSelect.value = cashOutPerson; } 
         
@@ -1305,12 +1315,16 @@ function closeForm() {
     const employeeSelect = document.getElementById('salaryEmployeeSelect');
     if (employeeSelect) employeeSelect.value = '';
     
+    // ✅ ফিক্সড: incategory এর ডিফল্ট মান 'প্রজেক্ট 🔬' সেট করা
     const inCategorySelect = document.getElementById('incategory');
-    if (inCategorySelect) { inCategorySelect.selectedIndex = inCategorySelect.options.length > 1 ? 1 : 0; }
+    if (inCategorySelect) { inCategorySelect.value = 'প্রজেক্ট 🔬'; }
+    
     const inPersonSelect = document.getElementById('inperson');
-    if (inPersonSelect) { inPersonSelect.selectedIndex = inPersonSelect.options.length > 1 ? 1 : 0; }
+    if (inPersonSelect) { inPersonSelect.value = cashInPerson; } // জমা💰করা
+    
     const outCategorySelect = document.getElementById('outcategory');
-    if (outCategorySelect) { outCategorySelect.selectedIndex = outCategorySelect.options.length > 1 ? 1 : 0; }
+    if (outCategorySelect) { outCategorySelect.selectedIndex = outCategorySelect.options.length > 0 ? 0 : -1; }
+    
     const outPersonSelect = document.getElementById('outperson');
     if (outPersonSelect) { outPersonSelect.value = cashOutPerson; } 
 }  
@@ -1398,10 +1412,20 @@ function calculateAndDisplayBalance() {
     transactions.forEach(t => {
         // --- ক্যাশ ব্যালেন্স এবং ব্যাংক ব্যালেন্স ---
         if (t.type === 'in') {
-            if (t.person === kingBankCategory) { 
-                totalKingBank += t.amount; // ব্যাংক জমা
-            } else {
-                totalCashIn += t.amount;   // ক্যাশ জমা (লোন পরিশোধ, ক্যাশ ইন)
+            // ✅ সংশোধিত লজিক: Bank🏛️থেকে + জমা💰করা = Bank থেকে ক্যাশে ট্রান্সফার
+            if (t.category === bankToCashCategory && t.person === cashInPerson) { 
+                // King Bank থেকে কমবে
+                totalKingBank -= t.amount; 
+                // মোট ক্যাশ ইন বাড়বে 
+                totalCashIn += t.amount;
+            }
+            // সাধারণ Bank Deposit (Bank DP)
+            else if (t.person === kingBankCategory) { 
+                totalKingBank += t.amount; 
+            } 
+            // অন্য সব ক্যাশ ইন (যেমন প্রজেক্ট, লোন পরিশোধ)
+            else {
+                totalCashIn += t.amount;   
             }
         } 
         else if (t.type === 'out') {
@@ -1433,8 +1457,8 @@ function calculateAndDisplayBalance() {
 
         // --- আজকের হিসাব ---
         if (t.date === todayDateString) {
-            // কার্ড ২: আজকের জমা (নগদ জমা, ব্যাংক জমা নয়)
-            if (t.type === 'in' && t.person !== kingBankCategory) { 
+            // কার্ড ২: আজকের জমা (নগদ জমা, Bank DP বা Bank To Cash Transfar নয়)
+            if (t.type === 'in' && t.person !== kingBankCategory && t.category !== bankToCashCategory) { 
                 totalInToday += t.amount;
             } 
             // কার্ড ৩: আজকের খরচ (নগদ খরচ + ব্যাংক খরচ)
@@ -1596,18 +1620,28 @@ function updateResultAmount() {
     const selectedCategory = document.getElementById('categoryFilter') ? document.getElementById('categoryFilter').value : 'all';
     
     filtered.forEach(t => {
-        totalAmount += t.amount;
+        // ✅ ফিক্সড: Bank To Cash Transfer কে রেজাল্ট অ্যামাউন্টে যোগ না করা
+        if (selectedCategory === 'IN_ONLY' || selectedCategory === 'OUT_ONLY' || selectedCategory === 'all') {
+            // যদি ফিল্টার all/IN_ONLY/OUT_ONLY হয়, তবে সব যোগ হবে
+            totalAmount += t.amount;
+        } 
+        else {
+            // যদি নির্দিষ্ট ক্যাটাগরি ফিল্টার হয়, তবে শুধুমাত্র সেই ক্যাটাগরির অ্যামাউন্ট যোগ হবে।
+            totalAmount += t.amount;
+        }
     });
 
     const resultDiv = document.querySelector('.table-rejalt');
     
     if (resultDiv) {
         if (selectedCategory === 'all') {
+            // 'all' এর জন্য ক্যাশ ব্যালেন্স দেখানো
             const netBalanceText = document.querySelector('.card1 p') ? document.querySelector('.card1 p').innerText.replace('৳ ', '') : '0';
             const netBalance = parseFloat(netBalanceText) || 0;
             resultDiv.innerText = `৳ ${netBalance.toFixed(0)}`;
         } 
         else {
+            // অন্যান্য ফিল্টারের জন্য মোট টাকা দেখানো
             resultDiv.innerText = `৳ ${totalAmount.toFixed(0)}`;
         }
     }
@@ -1638,6 +1672,12 @@ function saveTransaction(type) {
 
     if (isNaN(amount) || amount <= 0) {
         alert("সঠিক পরিমাণ লিখুন।");
+        return;
+    }
+    
+    // ✅ নতুন ফিক্স: ক্যাশ ইন ফর্মে Bank DP সিলেক্ট থাকলে সেভ হবে না
+    if (type === 'in' && personValue === kingBankCategory) {
+        alert("ক্যাশ ইন এর জন্য 'BANK🏦DP' নির্বাচন করা যাবে না। এটি একটি Bank Deposit, তাই 'প্রজেক্ট 🔬' অথবা অন্য Cash In ক্যাটাগরি ব্যবহার করুন।");
         return;
     }
     
@@ -1858,12 +1898,16 @@ function displayTransactions() {
             customStyle = 'style="color: #5d30d9; font-weight: bold;"'; 
         }
         // কার্ড ৬: কম্পানির ঋণ (দেনা) - ঋন নেওয়া🩸, ঋন দেওয়া♻️
-        if (t.category === loanTakenCategory || t.category === loanGivenCategory) {
+        else if (t.category === loanTakenCategory || t.category === loanGivenCategory) {
             customStyle = 'style="color: #dd3be3; font-weight: bold;"'; 
         }
         // Bank DP (Cash In)
        else if (t.type === 'in' && t.person === kingBankCategory) { 
              customStyle = 'style="color: #007bff; font-weight: bold;"'; 
+        }
+        // ✅ ফিক্সড: Bank To Cash Transfer - Bank🏛️থেকে + জমা💰করা
+       else if (t.type === 'in' && t.category === bankToCashCategory && t.person === cashInPerson) { 
+             customStyle = 'style="color: #4A90E2; font-weight: bold;"'; // অন্য রং সেট করা হলো
         }
         
         // originalIndex দরকার নেই, কারণ edit/delete filtered array-এর index ব্যবহার করবে
@@ -2098,10 +2142,11 @@ document.querySelectorAll('#transactionBody > div').forEach(function(el) {
 // =======================================================
 
 function populateFormSelects() {
-    populateSelect('incategory', IN_CATEGORIES_HTML, false, 'প্রজেক্ট 🔬');
-    populateSelect('inperson', IN_PERSONS_HTML, false, 'জমা💰করা');
+    // ✅ ফিক্সড: incategory এর ডিফল্ট মান 'প্রজেক্ট 🔬' সেট করা
+    populateSelect('incategory', IN_CATEGORIES_HTML, false, 'প্রজেক্ট 🔬'); 
+    populateSelect('inperson', IN_PERSONS_HTML, false, cashInPerson);
     
-    populateSelect('outcategory', OUT_CATEGORIES, false, 'বাজার🛍️সদাই');
+    populateSelect('outcategory', OUT_CATEGORIES, false, '🍆🥬 বাজার 🌶️🥔');
     populateSelect('outperson', OUT_PERSONS, false, cashOutPerson);
 }
 
@@ -2113,7 +2158,7 @@ function loadSelectOptions() {
     
     populateSalaryEmployeeSelect(); 
     
-    const allCategories = ['প্রজেক্ট 🔬', '👜RRR Bazar', 'ঋন নেওয়া🩸', 'লোন পরিশোধ🫲', 'লোন নেওয়া🫱️', '🍆🥬 বাজার 🌶️🥔', '🫙🍱 সদাই 🛒🛍️', 'যাতায়াত🚕খরচ', '👥 মার্কেটিং টিম 🏪', 'নাস্তা🥪,লাঞ্চ,🍜', 
+    const allCategories = ['প্রজেক্ট 🔬', bankToCashCategory, '👜RRR Bazar', 'ঋন নেওয়া🩸', 'লোন পরিশোধ🫲', 'লোন নেওয়া🫱️', '🍆🥬 বাজার 🌶️🥔', '🫙🍱 সদাই 🛒🛍️', 'যাতায়াত🚕খরচ', '👥 মার্কেটিং টিম 🏪', 'নাস্তা🥪,লাঞ্চ,🍜', 
     'এক্সোসেরিজ🛒', 'সার্ভিস🔧কস্ট', 'ঋন দেওয়া♻️', 'Advance 💸', '💵Salary💶' ]; // সব ক্যাটাগরি একসাথে
     populateSelect('categoryFilter', allCategories, true); 
 }
@@ -2128,6 +2173,14 @@ function populateSelect(elementId, optionsArray, isFilter = false, defaultValue 
     
     const existingOptions = Array.from(selectElement.options).map(opt => opt.value);
     
+    // ক্যাশ ইন-এর জন্য অতিরিক্ত একটি অপশন যোগ করা যাতে ডিফল্ট প্রজেক্ট সিলেক্ট থাকে
+    if(elementId === 'incategory' && !isFilter) {
+         const emptyOption = document.createElement('option');
+         emptyOption.value = '';
+         emptyOption.textContent = 'ক্যাটাগরি নির্বাচন করুন';
+         // এখানে prepend না করে, Array এর প্রথম দিকে default value কে রাখাটাই যুক্তিযুক্ত
+    }
+    
     optionsArray.forEach(optionValue => {
         if (!existingOptions.includes(optionValue) || !isFilter) {
             const option = document.createElement('option');
@@ -2139,7 +2192,8 @@ function populateSelect(elementId, optionsArray, isFilter = false, defaultValue 
     
     if (defaultValue && selectElement.querySelector(`option[value="${defaultValue}"]`)) {
         selectElement.value = defaultValue;
-    } else if (selectElement.options.length > 0) {
+    } else if (selectElement.options.length > 0 && !isFilter) {
+        // যদি ডিফল্ট ভ্যালু না থাকে, তবে প্রথম অপশন সিলেক্ট করা
         selectElement.selectedIndex = 0;
     }
 }
