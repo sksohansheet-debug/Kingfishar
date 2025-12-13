@@ -372,7 +372,7 @@ width: 200px!important;
 }   
 
 
-    /* ======================================================= */
+    /* =======================================================
     /* === চূড়ান্ত ফিক্সড CSS (টেবিল হেডার + রো + স্ক্রল) === */
     /* ======================================================= */
 
@@ -865,7 +865,8 @@ width: 200px!important;
     <h1 class="cashintext">ক্যাশ ইন</h1>
     <div class="row-line-type">
        <select class="account-type-b" id="incategory"required>
-  <option value="" disabled selected>Select</option>           <option>প্রজেক্ট 🔬</option>
+  <option value="" disabled selected>Select</option>          
+             <option>প্রজেক্ট 🔬</option>
             <option>👜RRR Bazar</option>
             <option>ঋন নেওয়া🩸</option>
              <option>লোন পরিশোধ🫲</option> 
@@ -884,7 +885,7 @@ width: 200px!important;
         <img src="time.png" class="icon" onclick="openTime('In')"> 
 </div>
       <div class="date-box">
-    <span id="showDateIn">2025-11-14</span> 
+    <span id="showDateIn"></span> 
     <input type="date" id="datePickerIn" style="opacity:0; position:absolute; pointer-events:none;"> 
     <img src="calendar.png" class="icon" onclick="openDate('In')"> 
 </div>
@@ -938,7 +939,7 @@ width: 200px!important;
         <img src="time.png" class="icon" onclick="openTime('Out')"> 
 </div>
       <div class="date-box">
-    <span id="showDateOut">2025-11-14</span> 
+    <span id="showDateOut"></span> 
     <input type="date" id="datePickerOut" style="opacity:0; position:absolute; pointer-events:none;"> 
     <img src="calendar.png" class="icon" onclick="openDate('Out')"> 
 </div>
@@ -1100,7 +1101,7 @@ const firebaseConfig = {
   authDomain: "kingfishar-data.firebaseapp.com",
   databaseURL: "https://kingfishar-data-default-rtdb.firebaseio.com",
   projectId: "kingfishar-data",
-  storageBucket: "kingfishar-data.firebasestorage.app",
+  storageBucket: "kingfishar-data.firebaseapp.com",
   messagingSenderId: "799117473038",
   appId: "1:799117473038:web:36e73039a1f36a1195535f",
   measurementId: "G-TLH6L18170"
@@ -1180,7 +1181,8 @@ const loanGivenCategory = 'ঋন দেওয়া♻️'; // Cash Out
 
 // Firebase থেকে ডেটা লোড হবে, তাই localStorage বাদ
 let transactions = []; 
-const today = new Date().toISOString().substring(0, 10);
+
+// **সংশোধন ১:** todayDateString গ্লোবালি না করে, প্রয়োজন অনুসারে ফাংশনের ভেতরে তৈরি করা হবে।
 
 let rowsPerPage = 10; 
 let currentPage = 1;
@@ -1204,6 +1206,20 @@ function loadEmployeesFromDatabase() {
         name: emp.name,
         salary: parseFloat(emp.salary) || 0 
     }));
+}
+
+/**
+ * ইউটিলিটি ফাংশন: বর্তমানের স্থানীয় তারিখ (YYYY-MM-DD) স্ট্রিং ফরম্যাটে রিটার্ন করে।
+ * @returns {string} - YYYY-MM-DD
+ */
+function getLocalDateString() {
+    const now = new Date();
+    // স্থানীয় তারিখের অংশ (local date part) পেতে toISOString ব্যবহার করা হয়েছে।
+    // UTC থেকে টাইমজোন অফসেট এড়িয়ে স্থানীয় তারিখ নিশ্চিত করা হয়েছে।
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
 }
 
 
@@ -1253,7 +1269,8 @@ function openForm(type) {
         const outSaveBtn = document.getElementById('outSaveBtn');
         if (outSaveBtn) outSaveBtn.innerText = 'Save';
         
-        setAutoTime(TypeCapital);
+        // **সংশোধন ২:** এখানে setAutoTime কল করা হয়েছে
+        setAutoTime(TypeCapital); 
 
         const inCategorySelect = document.getElementById('incategory');
         if (inCategorySelect) { inCategorySelect.selectedIndex = inCategorySelect.options.length > 1 ? 1 : 0; }
@@ -1298,12 +1315,15 @@ function closeForm() {
     if (outPersonSelect) { outPersonSelect.value = cashOutPerson; } 
 }  
 
-
+// **সংশোধন ৩: setAutoTime ফাংশনে ডেট লজিক পরিবর্তন করা হয়েছে**
 function setAutoTime(type) {
     const now = new Date();
+    
+    // **সংশোধিত ডেট লজিক**
+    const today = getLocalDateString(); 
+
     let hour = now.getHours();
     let minute = now.getMinutes();
-    const today = now.toISOString().substring(0, 10);
 
     minute = minute < 10 ? "0" + minute : minute;
     let ampm = hour >= 12 ? "PM" : "AM";
@@ -1316,6 +1336,7 @@ function setAutoTime(type) {
         now.toISOString().substring(11, 16);
     document.getElementById(`datePicker${type}`).value = today;
 }
+
 function openTime(type) {
     const timeInput = document.getElementById(`timePicker${type}`);
     if (timeInput && timeInput.showPicker) timeInput.showPicker();
@@ -1370,6 +1391,9 @@ function calculateAndDisplayBalance() {
     // Cash In/Out
     let totalCashIn = 0;
     let totalCashOut = 0;
+    
+    // আজকের তারিখ স্থানীয়ভাবে পেতে হবে
+    const todayDateString = getLocalDateString(); 
 
     transactions.forEach(t => {
         // --- ক্যাশ ব্যালেন্স এবং ব্যাংক ব্যালেন্স ---
@@ -1408,7 +1432,7 @@ function calculateAndDisplayBalance() {
         }
 
         // --- আজকের হিসাব ---
-        if (t.date === today) {
+        if (t.date === todayDateString) {
             // কার্ড ২: আজকের জমা (নগদ জমা, ব্যাংক জমা নয়)
             if (t.type === 'in' && t.person !== kingBankCategory) { 
                 totalInToday += t.amount;
@@ -2197,6 +2221,24 @@ function clearDateRange() {
 // =======================================================
 
 window.onload = function() {
+    
+    // **সংশোধন ৪: স্থানীয় তারিখ পেতে getLocalDateString() ব্যবহার করা হয়েছে**
+    const today = getLocalDateString(); 
+    
+    // Date/Time UI সেট করা 
+    // ✅ ফিক্সড: HTML থেকে স্থির তারিখ সরিয়ে এখানে আজকের তারিখ সেট করা হলো
+    const datePickerIn = document.getElementById("datePickerIn");
+    if(datePickerIn) datePickerIn.value = today;
+    const showDateIn = document.getElementById("showDateIn");
+    if(showDateIn) showDateIn.innerText = today;
+    
+    const datePickerOut = document.getElementById("datePickerOut");
+    if(datePickerOut) datePickerOut.value = today;
+    const showDateOut = document.getElementById("showDateOut");
+    if(showDateOut) showDateOut.innerText = today;
+
+    clearDateRange(); 
+    
     // শুধুমাত্র যদি Firebase লোড হয়ে থাকে
     if (typeof firebase !== 'undefined' && transactionsRef) {
         
@@ -2226,22 +2268,6 @@ window.onload = function() {
          // যদি Firebase লোড না হয় তবে লোকাল ফলব্যাক (ঐচ্ছিক)
          console.warn("Firebase লোড না হওয়ায় ডেটা দেখানো সম্ভব হচ্ছে না।");
     }
-
-    const now = new Date();
-    const today = now.toISOString().substring(0, 10);
-    
-    // Date/Time UI সেট করা 
-    const datePickerIn = document.getElementById("datePickerIn");
-    if(datePickerIn) datePickerIn.value = today;
-    const showDateIn = document.getElementById("showDateIn");
-    if(showDateIn) showDateIn.innerText = today;
-    
-    const datePickerOut = document.getElementById("datePickerOut");
-    if(datePickerOut) datePickerOut.value = today;
-    const showDateOut = document.getElementById("showDateOut");
-    if(showDateOut) showDateOut.innerText = today;
-
-    clearDateRange(); 
 };
 </script>
 </body>
